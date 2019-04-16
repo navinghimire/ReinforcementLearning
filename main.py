@@ -30,27 +30,27 @@ def main():
 
     pickupItemCount2 = [5,5,5]
     dropoffItemCount2 = [0,0,0]
-    startingState2 = State(0, 2, 1)
+    startingState2 = State(0, 4, 0)
     startLocation2 = (270,0)
     world2 = PDWorld(startLocation2, cellSize ,mainSurfaceSize, numGrid, startingState2,agentSize,pickupPoints,dropoffPoints,pickupItemCount2,dropoffItemCount2)
 
     pickupItemCount3 = [5,5,5]
     dropoffItemCount3 = [0,0,0]
-    startingState3 = State(0, 2, 1)
+    startingState3 = State(0, 4, 0)
     startLocation3 = (540,0)
     world3 = PDWorld(startLocation3, cellSize ,mainSurfaceSize, numGrid, startingState3,agentSize,pickupPoints,dropoffPoints,pickupItemCount3,dropoffItemCount3)
 
     pickupItemCount4 = [5,5,5]
     dropoffItemCount4 = [0,0,0]
-    startingState4 = State(0, 2, 1)
+    startingState4 = State(0, 4, 0)
     startLocation4 = (0,370)
     world4 = PDWorld(startLocation4, cellSize ,mainSurfaceSize, numGrid, startingState4,agentSize,pickupPoints,dropoffPoints,pickupItemCount4,dropoffItemCount4)
 
     pickupItemCount5 = [5,5,5]
     dropoffItemCount5 = [0,0,0]
-    startingState5 = State(0, 2, 1)
+    startingState5 = State(0, 4, 0)
     startLocation5 = (270,370)
-    world5 = PDWorld(startLocation5, cellSize ,mainSurfaceSize, numGrid, startingState4,agentSize,pickupPoints,dropoffPoints,pickupItemCount5,dropoffItemCount5)
+    world5 = PDWorld(startLocation5, cellSize ,mainSurfaceSize, numGrid, startingState5,agentSize,pickupPoints,dropoffPoints,pickupItemCount5,dropoffItemCount5)
 
     policy1 = Policy(PolicyType.RANDOM)
     policy2 = Policy(PolicyType.EXPLOIT)
@@ -58,11 +58,11 @@ def main():
     policy4 = Policy(PolicyType.EXPLOIT)
     policy5 = Policy(PolicyType.RANDOM)
 
-    qtable1 = QTable(NUM_STATES,NUM_ACTIONS, mainSurfaceSize, qtableLocation, Populate.ONES)
-    qtable2 = QTable(NUM_STATES, NUM_ACTIONS, mainSurfaceSize, qtableLocation, Populate.ZEROS)
-    qtable3 = QTable(NUM_STATES, NUM_ACTIONS, mainSurfaceSize, qtableLocation, Populate.RANDOM)
-    qtable4 = QTable(NUM_STATES, NUM_ACTIONS, mainSurfaceSize, qtableLocation, Populate.ONES)
-    qtable5 = QTable(NUM_STATES, NUM_ACTIONS, mainSurfaceSize, qtableLocation, Populate.ZEROS)
+    qtable1 = QTable(NUM_STATES,NUM_ACTIONS, mainSurfaceSize, qtableLocation, Populate.ZEROS,world1)
+    qtable2 = QTable(NUM_STATES, NUM_ACTIONS, mainSurfaceSize, qtableLocation, Populate.ZEROS, world2)
+    qtable3 = QTable(NUM_STATES, NUM_ACTIONS, mainSurfaceSize, qtableLocation, Populate.ZEROS, world3)
+    qtable4 = QTable(NUM_STATES, NUM_ACTIONS, mainSurfaceSize, qtableLocation, Populate.ZEROS, world4)
+    qtable5 = QTable(NUM_STATES, NUM_ACTIONS, mainSurfaceSize, qtableLocation, Populate.ZEROS, world5)
 
     r1 = RLearning(1, world1, qtable1, policy1, RL.Q_LEARNING, 0.3, 0.5, 0.2, 0, 4,0)
     r2 = RLearning(2, world2, qtable2, policy2, RL.Q_LEARNING, 0.1, 0.5, 0.2, 0, 4,0)
@@ -82,8 +82,9 @@ def main():
         else:
             e.world.selected = False
 
+    for r in rl:
+        r.nextEpisode()
     while True:
-
         event = pygame.event.poll()
         pressed = pygame.key.get_pressed()
         if event.type == pygame.QUIT:

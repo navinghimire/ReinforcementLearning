@@ -1,12 +1,13 @@
 import pygame
 from elements import Color, Action
 class PDWorld:
-    def __init__(self, startLocation, cellSize, surfaceSize, numGrid,state, agentSize, pickupPoints, dropOffPoints, pickupItemCount, dropOffItemCount):
+    def __init__(self, startLocation, cellSize, surfaceSize, numGrid, state, agentSize, pickupPoints, dropOffPoints, pickupItemCount, dropOffItemCount):
         self.surface = pygame.Surface(surfaceSize)
         self.surface.fill(Color.VL_GREY)
         self.startLocation = startLocation
         self.surfaceSize = surfaceSize
         self.numGrid = numGrid
+        self.startState = state
         self.cellSize = cellSize
         self.state = state
         self.agentSize = agentSize

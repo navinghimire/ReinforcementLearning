@@ -23,8 +23,14 @@ class RLearning:
         self.stepDone = False
         self.selected = False
         self.font = pygame.font.SysFont("arial",16)
-    def nextAction(self, state):
+        self.s = None
+        self.a = None
+        self.r = None
+        self.s_ = None
+        self.a_ = None
+    def chooseAction(self, state):
         applicableActions = self.world.getApplicableActions(state)
+        indd = [x.value for x in applicableActions]
         choosenAction = None
         if self.policy.policyType == PolicyType.RANDOM:
             if Action.PICKUP in applicableActions:
@@ -34,7 +40,10 @@ class RLearning:
             else:
                 choosenAction = np.random.choice(applicableActions)
         elif self.policy.policyType == PolicyType.GREEDY:
-            choosenAction = np.random.choice(applicableActions)
+            v = self.qtable.argmax(state.indx(),indd)
+            for x in applicableActions:
+                if x.value == v:
+                    choosenAction = x
         elif self.policy.policyType == PolicyType.EXPLOIT:
             choosenAction = np.random.choice(applicableActions)
 
@@ -43,35 +52,52 @@ class RLearning:
         return choosenAction
     def applyaction(self,state,action):
         y,x,b = state.get()
+        r = None
         if action == Action.EAST:
             x = x + 1
+            r = -1
         elif action == Action.WEST:
             x = x - 1
+            r = -1
         elif action == Action.NORTH:
             y = y - 1
+            r = -1
         elif action == Action.SOUTH:
             y = y + 1
+            r = -1
         elif action == Action.PICKUP:
             b = 1
+            r = 13
             indx = self.world.pickupPoints.index((y,x))
             self.world.pickupItemCount[indx] -= 1
         elif action == Action.DROPOFF:
             b = 0
+            r = 13
             indx = self.world.dropoffPoints.index((y,x))
             self.world.dropoffItemCount[indx] += 1
-        return State(y,x,b)
+        return r, State(y,x,b)
     def isTerminalState(self):
         if self.world.pickupItemCount == [0,0,0] and self.world.dropoffItemCount == [5,5,5]:
             return True
         else:
             return False
     def nextStep(self):
-        applicableActions = self.world.getApplicableActions(self.world.state)
-        print(self.expNum,applicableActions)
-        actionSelected = self.nextAction(self.world.state)
+        # applicableActions = self.world.getApplicableActions(self.world.state)
+        # actionSelected = self.nextAction(self.world.state)
+        # print(self.expNum, applicableActions, actionSelected)
+        #
+        r,s_ = self.applyaction(self.s,self.a)
+        a_ = self.chooseAction(s_)
+        currentq = self.qtable.q[self.s.indx(),self.a.value]
+        nextq = self.qtable.q[s_.indx(),a_.value]
+        self.qtable.q[self.s.indx(),self.a.value] = currentq + self.alpha*(r + self.gamma*(nextq)-currentq)
+        self.s = s_
+        self.a = a_
+        self.world.state = self.s
+        print(self.a_)
 
-        while True:
-            continue
+        # while True:
+        #     continue
 
 
         if self.isTerminalState():
@@ -115,4 +141,8 @@ class RLearning:
         mainSurface.blit(self.surface,self.statLocation)
         return
     def nextEpisode(self):
+        self.s = self.world.startState
+        self.a = self.chooseAction(self.s)
+        print(self.a)
+        # exit()
         self.episodes += 1

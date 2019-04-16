@@ -5,3 +5,5 @@ class State:
         self.b = b
     def get(self):
         return [self.y,self.x,self.b]
+    def indx(self):
+        return self.y*5+self.x + (self.b * 25)
