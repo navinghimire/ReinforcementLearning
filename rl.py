@@ -1,5 +1,5 @@
 from policy import PolicyType
-from elements import Action,Color
+from elements import Action,Color, RL
 from state import  State
 import numpy as np
 import pygame
@@ -19,17 +19,21 @@ class RLearning:
         self.epsilon = epsilon
         self.episodes = episodes
         self.steps = steps
+        self.globalStep = 0
         self.currentStep = currentStep
         self.stepDone = False
         self.selected = False
+        self.minStep = []
         self.font = pygame.font.SysFont("arial",16)
-        self.s = None
-        self.a = None
-        self.r = None
-        self.s_ = None
-        self.a_ = None
+        self.s = self.world.state
+        self.a = Action.EAST
+        self.r = 0
+        self.s_ = self.world.state
+        self.a_ = Action.EAST
     def chooseAction(self, state):
         applicableActions = self.world.getApplicableActions(state)
+        # print(state.get(),applicableActions)
+        # time.sleep(100)
         indd = [x.value for x in applicableActions]
         choosenAction = None
         if self.policy.policyType == PolicyType.RANDOM:
@@ -38,14 +42,61 @@ class RLearning:
             elif Action.DROPOFF in applicableActions:
                 choosenAction = Action.DROPOFF
             else:
-                choosenAction = np.random.choice(applicableActions)
+                actionMaxQ = self.qtable.argmax(state,indd)
+                print(applicableActions)
+                randChoice = np.random.choice(actionMaxQ)
+                for i in range(len(applicableActions)):
+                    if i == randChoice:
+                        choosenAction = applicableActions[i]
+            # else:
+            #     choosenAction = np.random.choice(applicableActions)
         elif self.policy.policyType == PolicyType.GREEDY:
-            v = self.qtable.argmax(state.indx(),indd)
-            for x in applicableActions:
-                if x.value == v:
-                    choosenAction = x
+            # pygame.display.update()
+            # print(state.get(),applicableActions)
+            # time.sleep(1)
+            if Action.PICKUP in applicableActions:
+                choosenAction = Action.PICKUP
+            elif Action.DROPOFF in applicableActions:
+                choosenAction = Action.DROPOFF
+            else:
+                actionMaxQ = self.qtable.argmax(state,indd)
+                print(applicableActions)
+                randChoice = np.random.choice(actionMaxQ)
+                for i in range(len(applicableActions)):
+                    if i == randChoice:
+                        choosenAction = applicableActions[i]
+                # print(randChoice,randChoice)
+                # choosenAction = applicableActions[randChoice == ac]
+                # print(actionMaxQ,choosenAction)
+                # exit()
+                # for v in applicableActions:
+                #     print(v,actionMaxQ)
+
+
         elif self.policy.policyType == PolicyType.EXPLOIT:
-            choosenAction = np.random.choice(applicableActions)
+            if Action.PICKUP in applicableActions:
+                choosenAction = Action.PICKUP
+            elif Action.DROPOFF in applicableActions:
+                choosenAction = Action.DROPOFF
+            else:
+                actionMaxQ = self.qtable.argmax(state,indd)
+                print(applicableActions)
+                randChoice = np.random.choice(actionMaxQ)
+                choosenAction = applicableActions[randChoice]
+                print(actionMaxQ,state.get(),choosenAction)
+                # for v in applicableActions:
+                #     print(v,actionMaxQ)
+                # a = np.random.uniform(0,1)
+                # if a > self.epsilon:
+                #     v = self.qtable.argmax(state.indx(), indd)
+                #     for x in applicableActions:
+                #         if x.value == v:
+                #             choosenAction = x
+                #             break
+                #
+                # else:
+                #     choosenAction = np.random.choice(applicableActions)
+
 
         # elif self.policy.policyType == PolicyType.GREEDY:
         # elif self.policy.policyType == PolicyType.EXPLOIT:
@@ -86,25 +137,42 @@ class RLearning:
         # actionSelected = self.nextAction(self.world.state)
         # print(self.expNum, applicableActions, actionSelected)
         #
-        r,s_ = self.applyaction(self.s,self.a)
-        a_ = self.chooseAction(s_)
-        currentq = self.qtable.q[self.s.indx(),self.a.value]
-        nextq = self.qtable.q[s_.indx(),a_.value]
-        self.qtable.q[self.s.indx(),self.a.value] = currentq + self.alpha*(r + self.gamma*(nextq)-currentq)
-        self.s = s_
-        self.a = a_
+        if self.RLtype == RL.Q_LEARNING:
+
+            self.a = self.chooseAction(self.s)
+            print(type(self.a))
+            # exit(self.a.value)
+            r,s_ = self.applyaction(self.s,self.a)
+
+            currentq = self.qtable.q[self.s.indx(),self.a.value]
+            nextq = self.qtable.maxQ(s_)
+            self.qtable.q[self.s.indx(),self.a.value] = currentq + self.alpha*(r + self.gamma*(nextq)-currentq)
+            # if r > 1:
+            #     print(r,s_.get(),self.world.getApplicableActions(self.s))
+            #     pygame.display.update()
+            #
+            #     print(self.qtable.q[self.s.indx(),self.a.value])
+            #     time.sleep(10)
+            self.s = s_
+        elif self.RLtype == RL.SARSA:
+            r,s_ = self.applyaction(self.s,self.a)
+            a_ = self.chooseAction(s_)
+            currentq = self.qtable.q[self.s.indx(),self.a.value]
+            nextq = self.qtable.q[s_.indx(),a_.value]
+            self.qtable.q[self.s.indx(),self.a.value] = currentq + self.alpha*(r + self.gamma*(nextq)-currentq)
+            self.s = s_
+            self.a = a_
+        # print(r)
+        # time.sleep(2)
         self.world.state = self.s
-        print(self.a_)
+        # print(self.a_)
 
-        # while True:
-        #     continue
-
-
-        if self.isTerminalState():
-            self.world.reset()
-            self.nextEpisode()
+        # if self.isTerminalState():
+        #     self.world.reset()
+        #     self.nextEpisode()
 
         self.currentStep += 1
+        self.globalStep += 1
         self.stepDone = True
     def update(self):
         self.world.update()
@@ -113,9 +181,15 @@ class RLearning:
         parametersName = self.font.render('alpha: ' + str(self.alpha) + " | gamma: " + str(self.gamma) + " | epsilon: " + str(self.epsilon), True, Color.BLACK)
         gammaName = self.font.render('gamma:' + str(self.gamma), True, Color.BLACK)
         policyName = self.font.render('policy:' + self.policy.getName(), True, Color.BLACK)
-        stepCounter = self.font.render('step:' + str(self.currentStep) + ' | episode: ' + str(self.episodes), True, Color.BLACK)
+        y,x,b = self.world.state.get()
+        stepCounter = self.font.render('step:' + str(self.globalStep) + ' | episode: ' + str(self.episodes) + " | state: ["+str(y+1) + ' '+ str(x+1) + ' ' +str(b) + ']', True, Color.BLACK)
+        if self.episodes == 1:
+            minS = 0
+        else:
+            minS = min(self.minStep)
+        runStatistics = self.font.render('s/e:' + str(self.minStep), True, Color.BLACK)
 
-        if self.episodes > 0:
+        if self.episodes > 1:
             pygame.draw.rect(self.surface,Color.GREEN,pygame.Rect(0,0,self.world.numGrid[0]*self.world.cellSize,18))
         else:
             pygame.draw.rect(self.surface, Color.RED,
@@ -133,8 +207,9 @@ class RLearning:
 
         pygame.draw.rect(self.surface,Color.L_GREY,pygame.Rect(0,80,self.world.numGrid[0]*self.world.cellSize,18))
         self.surface.blit(stepCounter, (0, 80))
-        pygame.draw.rect(self.surface,Color.L_GREY,pygame.Rect(0,80,self.world.numGrid[0]*self.world.cellSize,18))
-        self.surface.blit(stepCounter, (0, 80))
+
+        pygame.draw.rect(self.surface,Color.L_GREY,pygame.Rect(0,100,self.world.numGrid[0]*self.world.cellSize,18))
+        self.surface.blit(runStatistics, (0, 100))
 
     def draw(self,mainSurface):
         self.world.draw(mainSurface)
@@ -142,7 +217,7 @@ class RLearning:
         return
     def nextEpisode(self):
         self.s = self.world.startState
-        self.a = self.chooseAction(self.s)
-        print(self.a)
-        # exit()
+        if self.RLtype == RL.SARSA:
+            self.a = self.chooseAction(self.s)
         self.episodes += 1
+

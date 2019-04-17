@@ -16,6 +16,7 @@ class PDWorld:
         self.pickupItemCount = pickupItemCount
         self.dropoffItemCount = dropOffItemCount
         self.selected = False
+
     def update(self):
         # draw grid
         offsetx = 10
@@ -63,7 +64,7 @@ class PDWorld:
 
     def getApplicableActions(self,state):
         y,x,b = state.get()
-        print(self.pickupPoints, (y,x))
+        # print(self.pickupPoints, (y,x))
         applicableActions = []
         if (y,x) in self.pickupPoints:
             pindex = self.pickupPoints.index((y,x))
