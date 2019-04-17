@@ -78,6 +78,7 @@ class QTable:
                         avGrid = pygame.Rect(stateNameOffset+a * self.gridWidthActions + 2, 15 + s * self.gridHeight,
                                              self.gridWidthActions - 2, self.gridHeight - 2)
                         if a in indxs:
+
                             pygame.draw.rect(self.surface, self.hsv2rgb(0.5, normalized[a], .70), avGrid)
                         else:
                             pygame.draw.rect(self.surface, Color.D_GREY, avGrid)

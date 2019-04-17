@@ -72,7 +72,7 @@ def main():
 
     qtables = [qtable1,qtable2,qtable3,qtable4,qtable5]
 
-    # np.random.seed(42)
+    np.random.seed(42)
 
     step = 0
     # rl = [r1,r2,r3]
@@ -86,21 +86,42 @@ def main():
 
     for r in rl:
         r.nextEpisode()
+    pygame.time.wait(1500)
+
     while True:
-        event = pygame.event.poll()
-        pressed = pygame.key.get_pressed()
-        if event.type == pygame.QUIT:
-            break
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            displayQtable += 1
-        if displayQtable > 4:
-            displayQtable = 0
+
+
+
         for r in rl:
+            event = pygame.event.poll()
+            if event.type == pygame.QUIT:
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    displayQtable += 1
+                if event.button == 3:
+                    displayQtable -= 1
+
+
+            if displayQtable > 4:
+                displayQtable = 0
+            if displayQtable < 0:
+                displayQtable = 4
+
+
             expN = r.expNum
             if expN-1 == displayQtable:
                 r.world.selected = True
             else:
                 r.world.selected = False
+
+            if step == 4000 or step == 200 or step == r.steps:
+                for i in range(5):
+                    qtables[i].update()
+                    qtables[i].draw(mainSurface)
+                    pygame.display.update()
+                    filename = 'Experiment_' + str(i+1) + '_' +str(step) +'.png'
+                    pygame.image.save(mainSurface,filename)
 
             if r.expNum == 1 and step == 4000:
                 r.policy.switchPolicy(PolicyType.GREEDY)

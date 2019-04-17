@@ -1,5 +1,6 @@
 import pygame
 from elements import Color, Action
+from state import State
 class PDWorld:
     def __init__(self, startLocation, cellSize, surfaceSize, numGrid, state, agentSize, pickupPoints, dropOffPoints, pickupItemCount, dropOffItemCount):
         self.surface = pygame.Surface(surfaceSize)
@@ -16,7 +17,8 @@ class PDWorld:
         self.pickupItemCount = pickupItemCount
         self.dropoffItemCount = dropOffItemCount
         self.selected = False
-
+        self.toggleView = True
+        self.stateView = 0
     def update(self):
         # draw grid
         offsetx = 10
@@ -36,6 +38,24 @@ class PDWorld:
                     pygame.draw.rect(self.surface, Color.WHITE, cell)
                 else:
                     pygame.draw.rect(self.surface, Color.L_GREY, cell)
+
+
+        if self.toggleView:
+            for i in range(5):
+                for j in range(5):
+                    b = self.stateView
+                    st = State(i,j,b)
+                    # center = (halborder + offsetx + j * self.cellSize + self.cellSize//2, halborder + offsety + i * self.cellSize + self.cellSize//2)
+                    #
+                    # pygame.draw.circle(self.surface,Color.BLACK,center,2)
+
+                    # stateIndex = st.indx()
+                    # polygon = pygame.Rect()
+                    # cell = pygame.Rect(halborder + j * self.cellSize + offsetx, halborder + i * self.cellSize + offsety,
+                    #                    self.cellSize, self.cellSize)
+
+
+
         # drawing agent
         y,x,b = self.state.get()
 
@@ -58,6 +78,8 @@ class PDWorld:
                 pygame.draw.circle(self.surface, Color.GREEN, (halborder+
                     x * self.cellSize + 10 * i + int(self.agentSize / 2) + offsetx, y * self.cellSize + border + offsety),
                                    int(self.agentSize / 2))
+
+
 
     def draw(self, targetSurface):
         targetSurface.blit(self.surface,self.startLocation)
