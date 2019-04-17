@@ -79,23 +79,14 @@ class RLearning:
             elif Action.DROPOFF in applicableActions:
                 choosenAction = Action.DROPOFF
             else:
-                actionMaxQ = self.qtable.argmax(state,indd)
-                print(applicableActions)
-                randChoice = np.random.choice(actionMaxQ)
-                choosenAction = applicableActions[randChoice]
-                print(actionMaxQ,state.get(),choosenAction)
-                # for v in applicableActions:
-                #     print(v,actionMaxQ)
-                # a = np.random.uniform(0,1)
-                # if a > self.epsilon:
-                #     v = self.qtable.argmax(state.indx(), indd)
-                #     for x in applicableActions:
-                #         if x.value == v:
-                #             choosenAction = x
-                #             break
-                #
-                # else:
-                #     choosenAction = np.random.choice(applicableActions)
+                a = np.random.uniform(0,1)
+                if a < self.epsilon:
+                    choosenAction = np.random.choice(applicableActions)
+                else:
+                    actionMaxQ = self.qtable.argmax(state, indd)
+                    print(applicableActions)
+                    randChoice = np.random.choice(actionMaxQ)
+                    choosenAction = applicableActions[randChoice]
 
 
         # elif self.policy.policyType == PolicyType.GREEDY:
@@ -162,18 +153,16 @@ class RLearning:
             self.qtable.q[self.s.indx(),self.a.value] = currentq + self.alpha*(r + self.gamma*(nextq)-currentq)
             self.s = s_
             self.a = a_
-        # print(r)
-        # time.sleep(2)
-        self.world.state = self.s
-        # print(self.a_)
 
-        # if self.isTerminalState():
-        #     self.world.reset()
-        #     self.nextEpisode()
+        self.world.state = self.s
 
         self.currentStep += 1
         self.globalStep += 1
         self.stepDone = True
+
+    def split_list(a_list):
+        half = len(a_list) // 2
+        return a_list[:half], a_list[half:]
     def update(self):
         self.world.update()
         # pygame.draw.rect(self.surface,Color.BLACK, pygame.Rect(0,0,20,20))
@@ -183,11 +172,12 @@ class RLearning:
         policyName = self.font.render('policy:' + self.policy.getName(), True, Color.BLACK)
         y,x,b = self.world.state.get()
         stepCounter = self.font.render('step:' + str(self.globalStep) + ' | episode: ' + str(self.episodes) + " | state: ["+str(y+1) + ' '+ str(x+1) + ' ' +str(b) + ']', True, Color.BLACK)
+
         if self.episodes == 1:
             minS = 0
         else:
             minS = min(self.minStep)
-        runStatistics = self.font.render('s/e:' + str(self.minStep), True, Color.BLACK)
+
 
         if self.episodes > 1:
             pygame.draw.rect(self.surface,Color.GREEN,pygame.Rect(0,0,self.world.numGrid[0]*self.world.cellSize,18))
@@ -208,8 +198,20 @@ class RLearning:
         pygame.draw.rect(self.surface,Color.L_GREY,pygame.Rect(0,80,self.world.numGrid[0]*self.world.cellSize,18))
         self.surface.blit(stepCounter, (0, 80))
 
-        pygame.draw.rect(self.surface,Color.L_GREY,pygame.Rect(0,100,self.world.numGrid[0]*self.world.cellSize,18))
-        self.surface.blit(runStatistics, (0, 100))
+        splitLength = 7
+        if len(self.minStep) > splitLength:
+            l1 = self.minStep[:splitLength]
+            l2 = self.minStep[splitLength:]
+            runStatistics1 = self.font.render('s/e:' + str(l1), True, Color.BLACK)
+            runStatistics2 = self.font.render('s/e:' + str(l2), True, Color.BLACK)
+            pygame.draw.rect(self.surface,Color.L_GREY,pygame.Rect(0,100,self.world.numGrid[0]*self.world.cellSize,18))
+            self.surface.blit(runStatistics1, (0, 100))
+            pygame.draw.rect(self.surface,Color.L_GREY,pygame.Rect(0,120,self.world.numGrid[0]*self.world.cellSize,18))
+            self.surface.blit(runStatistics2, (0, 120))
+        else:
+            runStatistics1 = self.font.render('s/e:' + str(self.minStep), True, Color.BLACK)
+            pygame.draw.rect(self.surface,Color.L_GREY,pygame.Rect(0,100,self.world.numGrid[0]*self.world.cellSize,18))
+            self.surface.blit(runStatistics1, (0, 100))
 
     def draw(self,mainSurface):
         self.world.draw(mainSurface)

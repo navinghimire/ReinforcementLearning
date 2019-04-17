@@ -43,13 +43,13 @@ def main():
     pickupItemCount4 = [5,5,5]
     dropoffItemCount4 = [0,0,0]
     startingState4 = State(0, 4, 0)
-    startLocation4 = (0,400)
+    startLocation4 = (0,405)
     world4 = PDWorld(startLocation4, cellSize ,mainSurfaceSize, numGrid, startingState4,agentSize,pickupPoints,dropoffPoints,pickupItemCount4,dropoffItemCount4)
 
     pickupItemCount5 = [5,5,5]
     dropoffItemCount5 = [0,0,0]
     startingState5 = State(0, 4, 0)
-    startLocation5 = (270,400)
+    startLocation5 = (270,405)
     world5 = PDWorld(startLocation5, cellSize ,mainSurfaceSize, numGrid, startingState5,agentSize,pickupPoints,dropoffPoints,pickupItemCount5,dropoffItemCount5)
 
     policy1 = Policy(PolicyType.RANDOM)
@@ -138,10 +138,9 @@ def main():
         qtables[displayQtable].update()
         qtables[displayQtable].draw(mainSurface)
 
-
         pygame.display.update()
         step += 1
-        clock.tick(10)
+        clock.tick(0)
 
 if __name__ == '__main__':
     main()
