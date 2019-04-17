@@ -40,28 +40,44 @@ class PDWorld:
                     pygame.draw.rect(self.surface, Color.L_GREY, cell)
 
 
+        polygonOffset = 1
         if self.toggleView:
             for i in range(5):
                 for j in range(5):
                     b = self.stateView
                     st = State(i,j,b)
-                    # center = (halborder + offsetx + j * self.cellSize + self.cellSize//2, halborder + offsety + i * self.cellSize + self.cellSize//2)
-                    #
-                    # pygame.draw.circle(self.surface,Color.BLACK,center,2)
 
-                    # stateIndex = st.indx()
+                    centerx, centery = (halborder + offsetx + j * self.cellSize + self.cellSize//2, halborder + offsety + i * self.cellSize + self.cellSize//2)
+                    topLeftx, topLefty = (halborder + offsetx + j * self.cellSize , halborder + offsety + i * self.cellSize)
+                    topRightx, topRighty = (halborder + offsetx + j * self.cellSize +self.cellSize, halborder + offsety + i * self.cellSize)
+                    bottomRightx, bottomRighty = (halborder + offsetx + j * self.cellSize + self.cellSize, halborder + offsety + i * self.cellSize + self.cellSize)
+                    bottomLeftx, bottomLefty = (halborder + offsetx + j * self.cellSize,
+                                   halborder + offsety + i * self.cellSize + self.cellSize)
+
+                    # pygame.draw.circle(self.surface,Color.BLACK,center,2)
+                    # pygame.draw.circle(self.surface,Color.BLACK,bottomLeft,2)
+                    # pygame.draw.circle(self.surface,Color.BLACK,bottomRight,2)
+                    # pygame.draw.circle(self.surface,Color.BLACK,topLeft,2)
+                    # pygame.draw.circle(self.surface, Color.BLACK, topRight, 2)
+                    northPolygon = pygame.draw.polygon(self.surface,Color.RED,((centerx,centery-polygonOffset),(topRightx-2*polygonOffset,topRighty+polygonOffset),(topLeftx+2*polygonOffset,topLefty+polygonOffset)))
+                    southPolygon = pygame.draw.polygon(self.surface,Color.GREEN,((centerx,centery+polygonOffset),(bottomLeftx+2*polygonOffset,bottomLefty-polygonOffset),(bottomRightx-2*polygonOffset,bottomLefty-polygonOffset)))
+                    eastPolygon = pygame.draw.polygon(self.surface,Color.GREY,((centerx-polygonOffset,centery),(topLeftx+polygonOffset,topLefty+2*polygonOffset),(bottomLeftx+polygonOffset, bottomLefty-2*polygonOffset)))
+                    westPolygon = pygame.draw.polygon(self.surface,Color.YELLOW,((centerx+polygonOffset, centery),(topRightx-polygonOffset,topLefty+2*polygonOffset),(bottomRightx-polygonOffset,bottomRighty-2*polygonOffset)))
+
+
+                    stateIndex = st.indx()
                     # polygon = pygame.Rect()
-                    # cell = pygame.Rect(halborder + j * self.cellSize + offsetx, halborder + i * self.cellSize + offsety,
-                    #                    self.cellSize, self.cellSize)
+                    cell = pygame.Rect(halborder + j * self.cellSize + offsetx, halborder + i * self.cellSize + offsety,
+                                       self.cellSize, self.cellSize)
 
 
 
         # drawing agent
         y,x,b = self.state.get()
 
-        pygame.draw.circle(self.surface, Color.GREY, (x*self.cellSize + int(self.cellSize/2) + offsetx + border,y*self.cellSize+int(self.cellSize/2) + offsety + border),self.agentSize)
+        pygame.draw.circle(self.surface, Color.GREY,(halborder + offsetx + x * self.cellSize + self.cellSize//2, halborder + offsety + y * self.cellSize + self.cellSize//2),self.agentSize)
         if b == 1:
-            pygame.draw.circle(self.surface,Color.WHITE, (x*self.cellSize + int(self.cellSize/2) + offsetx + border,y*self.cellSize+int(self.cellSize/2) + offsety+ border), int(self.agentSize/2))
+            pygame.draw.circle(self.surface,Color.WHITE, (halborder + offsetx + x * self.cellSize + self.cellSize//2, halborder + offsety + y * self.cellSize + self.cellSize//2), int(self.agentSize/2))
         # drawing pickupitems
         for p in self.pickupPoints:
             y,x = p

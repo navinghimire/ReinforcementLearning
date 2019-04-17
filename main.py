@@ -11,7 +11,7 @@ def main():
     pygame.init()
     clock = pygame.time.Clock()
     cellSize = 50
-    agentSize = 10
+    agentSize = 6
     mainSurfaceSize = (1280,820)
     mainSurface = pygame.display.set_mode(mainSurfaceSize)
     pickupPoints =[(0,0),(2,2),(4,4)]
@@ -67,7 +67,7 @@ def main():
     r1 = RLearning(1, world1, qtable1, policy1, RL.Q_LEARNING, 0.3, 0.5, 0.2, 0, 8000,0)
     r2 = RLearning(2, world2, qtable2, policy2, RL.Q_LEARNING, 0.3, 0.5, 0.2, 0, 8000,0)
     r3 = RLearning(3, world3, qtable3, policy3, RL.SARSA, 0.3, 0.5, 0.2, 0, 8000, 0)
-    r4 = RLearning(4, world4, qtable4, policy4, RL.SARSA, 0.3, 1, 0.2, 0, 4000, 0)
+    r4 = RLearning(4, world4, qtable4, policy4, RL.SARSA, 0.3, 1, 0.2, 0, 8000, 0)
     r5 = RLearning(5, world5, qtable5, policy5, RL. Q_LEARNING, 0.3, 0.5, 0.2, 0, 8000, 0)
 
     qtables = [qtable1,qtable2,qtable3,qtable4,qtable5]
@@ -115,13 +115,13 @@ def main():
             else:
                 r.world.selected = False
 
-            if step == 4000 or step == 200 or step == r.steps:
-                for i in range(5):
-                    qtables[i].update()
-                    qtables[i].draw(mainSurface)
-                    pygame.display.update()
-                    filename = 'Experiment_' + str(i+1) + '_' +str(step) +'.png'
-                    pygame.image.save(mainSurface,filename)
+            # if step == 4000 or step == 200 or step == r.steps:
+            #     for i in range(5):
+            #         qtables[i].update()
+            #         qtables[i].draw(mainSurface)
+            #         pygame.display.update()
+            #         filename = 'Experiment_' + str(i+1) + '_' +str(step) +'.png'
+            #         pygame.image.save(mainSurface,filename)
 
             if r.expNum == 1 and step == 4000:
                 r.policy.switchPolicy(PolicyType.GREEDY)
