@@ -43,7 +43,7 @@ class RLearning:
                 choosenAction = Action.DROPOFF
             else:
                 actionMaxQ = self.qtable.argmax(state,indd)
-                print(applicableActions)
+                # print(applicableActions)
                 randChoice = np.random.choice(actionMaxQ)
                 for i in range(len(applicableActions)):
                     if i == randChoice:
@@ -60,7 +60,7 @@ class RLearning:
                 choosenAction = Action.DROPOFF
             else:
                 actionMaxQ = self.qtable.argmax(state,indd)
-                print(applicableActions)
+                # print(applicableActions)
                 randChoice = np.random.choice(actionMaxQ)
                 for i in range(len(applicableActions)):
                     if i == randChoice:
@@ -84,7 +84,7 @@ class RLearning:
                     choosenAction = np.random.choice(applicableActions)
                 else:
                     actionMaxQ = self.qtable.argmax(state, indd)
-                    print(applicableActions)
+                    # print(applicableActions)
                     randChoice = np.random.choice(actionMaxQ)
                     choosenAction = applicableActions[randChoice]
 
@@ -124,26 +124,17 @@ class RLearning:
         else:
             return False
     def nextStep(self):
-        # applicableActions = self.world.getApplicableActions(self.world.state)
-        # actionSelected = self.nextAction(self.world.state)
-        # print(self.expNum, applicableActions, actionSelected)
-        #
+
         if self.RLtype == RL.Q_LEARNING:
 
             self.a = self.chooseAction(self.s)
-            print(type(self.a))
-            # exit(self.a.value)
+
             r,s_ = self.applyaction(self.s,self.a)
 
             currentq = self.qtable.q[self.s.indx(),self.a.value]
             nextq = self.qtable.maxQ(s_)
             self.qtable.q[self.s.indx(),self.a.value] = currentq + self.alpha*(r + self.gamma*(nextq)-currentq)
-            # if r > 1:
-            #     print(r,s_.get(),self.world.getApplicableActions(self.s))
-            #     pygame.display.update()
-            #
-            #     print(self.qtable.q[self.s.indx(),self.a.value])
-            #     time.sleep(10)
+
             self.s = s_
         elif self.RLtype == RL.SARSA:
             r,s_ = self.applyaction(self.s,self.a)
