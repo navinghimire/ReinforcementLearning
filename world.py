@@ -59,10 +59,12 @@ class PDWorld:
                     # pygame.draw.circle(self.surface,Color.BLACK,bottomRight,2)
                     # pygame.draw.circle(self.surface,Color.BLACK,topLeft,2)
                     # pygame.draw.circle(self.surface, Color.BLACK, topRight, 2)
-                    northPolygon = pygame.draw.polygon(self.surface,Color.RED,((centerx,centery-polygonOffset),(topRightx-2*polygonOffset,topRighty+polygonOffset),(topLeftx+2*polygonOffset,topLefty+polygonOffset)))
+
+
+                    northPolygon = pygame.draw.polygon(self.surface,Color.GREEN,((centerx,centery-polygonOffset),(topRightx-2*polygonOffset,topRighty+polygonOffset),(topLeftx+2*polygonOffset,topLefty+polygonOffset)))
                     southPolygon = pygame.draw.polygon(self.surface,Color.GREEN,((centerx,centery+polygonOffset),(bottomLeftx+2*polygonOffset,bottomLefty-polygonOffset),(bottomRightx-2*polygonOffset,bottomLefty-polygonOffset)))
-                    eastPolygon = pygame.draw.polygon(self.surface,Color.GREY,((centerx-polygonOffset,centery),(topLeftx+polygonOffset,topLefty+2*polygonOffset),(bottomLeftx+polygonOffset, bottomLefty-2*polygonOffset)))
-                    westPolygon = pygame.draw.polygon(self.surface,Color.YELLOW,((centerx+polygonOffset, centery),(topRightx-polygonOffset,topLefty+2*polygonOffset),(bottomRightx-polygonOffset,bottomRighty-2*polygonOffset)))
+                    eastPolygon = pygame.draw.polygon(self.surface,Color.GREEN,((centerx-polygonOffset,centery),(topLeftx+polygonOffset,topLefty+2*polygonOffset),(bottomLeftx+polygonOffset, bottomLefty-2*polygonOffset)))
+                    westPolygon = pygame.draw.polygon(self.surface,Color.GREEN,((centerx+polygonOffset, centery),(topRightx-polygonOffset,topLefty+2*polygonOffset),(bottomRightx-polygonOffset,bottomRighty-2*polygonOffset)))
 
 
                     stateIndex = st.indx()
@@ -79,20 +81,23 @@ class PDWorld:
         if b == 1:
             pygame.draw.circle(self.surface,Color.WHITE, (halborder + offsetx + x * self.cellSize + self.cellSize//2, halborder + offsety + y * self.cellSize + self.cellSize//2), int(self.agentSize/2))
         # drawing pickupitems
+        packageOffset = 8
+        packageOffsetFromOriginX = 8
+        packageOffsetFromOriginY = 2
         for p in self.pickupPoints:
             y,x = p
             indx = self.pickupPoints.index(p)
             totalP = self.pickupItemCount[indx]
             for i in range(totalP):
-                pygame.draw.circle(self.surface, Color.RED, (halborder+
-                x * self.cellSize + 10 * i + int(self.agentSize/2) + offsetx, y * self.cellSize + border + offsety),int(self.agentSize/2))
+                pygame.draw.circle(self.surface, Color.RED, (halborder+packageOffsetFromOriginX+
+                x * self.cellSize + packageOffset * i + int(self.agentSize/2) + offsetx, y * self.cellSize + border + offsety+packageOffsetFromOriginY),int(self.agentSize/2))
         for d in self.dropoffPoints:
             y, x = d
             indx = self.dropoffPoints.index(d)
             totalP = self.dropoffItemCount[indx]
             for i in range(totalP):
-                pygame.draw.circle(self.surface, Color.GREEN, (halborder+
-                    x * self.cellSize + 10 * i + int(self.agentSize / 2) + offsetx, y * self.cellSize + border + offsety),
+                pygame.draw.circle(self.surface, Color.BLACK, (halborder+packageOffsetFromOriginX+
+                    x * self.cellSize + packageOffset * i + int(self.agentSize / 2) + offsetx, y * self.cellSize + border + offsety +packageOffsetFromOriginY),
                                    int(self.agentSize / 2))
 
 

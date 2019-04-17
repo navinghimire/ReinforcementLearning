@@ -6,12 +6,15 @@ import numpy as np
 from rl import RLearning
 from policy import Policy,PolicyType
 from  elements import Color, Populate, Action, RL
+import colorsys
 
 def main():
+    # print(colorsys.rgb_to_hsv(86, 201, 123))
+    # exit()
     pygame.init()
     clock = pygame.time.Clock()
     cellSize = 50
-    agentSize = 6
+    agentSize = 4
     mainSurfaceSize = (1280,820)
     mainSurface = pygame.display.set_mode(mainSurfaceSize)
     pickupPoints =[(0,0),(2,2),(4,4)]

@@ -142,6 +142,7 @@ class RLearning:
             currentq = self.qtable.q[self.s.indx(),self.a.value]
             nextq = self.qtable.q[s_.indx(),a_.value]
             self.qtable.q[self.s.indx(),self.a.value] = currentq + self.alpha*(r + self.gamma*(nextq)-currentq)
+            # self.s.qValue = self.qtable.q[self.s.indx(),self.a.value]   # just keeping track for visualization
             self.s = s_
             self.a = a_
 

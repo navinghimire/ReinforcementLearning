@@ -55,6 +55,7 @@ class QTable:
         actionValues = [x.value for x in actionList]
         ary = max(self.q[state.indx(),actionValues])
         return ary
+
     def hsv2rgb(self,h,s,v):
         return tuple(round(i*255) for i in colorsys.hsv_to_rgb(h,s,v))
     def update(self):
@@ -78,10 +79,13 @@ class QTable:
                         avGrid = pygame.Rect(stateNameOffset+a * self.gridWidthActions + 2, 15 + s * self.gridHeight,
                                              self.gridWidthActions - 2, self.gridHeight - 2)
                         if a in indxs:
-
-                            pygame.draw.rect(self.surface, self.hsv2rgb(0.5, normalized[a], .70), avGrid)
+                            if self.q[s][a] < 0:
+                                pygame.draw.rect(self.surface, self.hsv2rgb(0,normalized[a],1), avGrid)
+                            else:
+                                # 0.380,0.572,0.788
+                                pygame.draw.rect(self.surface, self.hsv2rgb(0.380,normalized[a]*0.572,0.788), avGrid)
                         else:
-                            pygame.draw.rect(self.surface, Color.D_GREY, avGrid)
+                            pygame.draw.rect(self.surface, Color.BLACK, avGrid)
 
                         qValues = self.font.render(str(round(self.q[s][a], 4)), True, Color.BLACK)
                         self.surface.blit(qValues, (stateNameOffset+a * self.gridWidthActions + 2, 15 + s * self.gridHeight - 2))

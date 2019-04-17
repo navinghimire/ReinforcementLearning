@@ -3,6 +3,7 @@ class State:
         self.x = x
         self.y = y
         self.b = b
+        self.qValue = 0
     def get(self):
         return [self.y,self.x,self.b]
     def indx(self):
