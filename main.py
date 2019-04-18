@@ -13,6 +13,7 @@ def main():
     # exit()
     pygame.init()
     clock = pygame.time.Clock()
+    frameRate = 0
     cellSize = 50
     agentSize = 4
     mainSurfaceSize = (1280,820)
@@ -97,7 +98,7 @@ def main():
         r.world.qtable = qtables[i]
         i += 1
         r.nextEpisode()
-    pygame.time.wait(1500)
+    # pygame.time.wait(1500)
 
     render = False
     while True:
@@ -174,7 +175,7 @@ def main():
         pygame.display.update()
 
         step += 1
-        clock.tick(0)
+        clock.tick(frameRate)
 
 if __name__ == '__main__':
     main()

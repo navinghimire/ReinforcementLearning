@@ -68,7 +68,7 @@ class QTable:
                 for b in range(2):
                     st = State(i,j,b)
                     s = st.indx()
-                    normalized = self.interpolate(0, 1, s)
+                    normalized = self.interpolate(0.5, 1, s)
                     actns = self.world.getApplicableActions(st)
                     indxs = [x.value for x in actns]
                     stateGrid = pygame.Rect(0, 15 + s * self.gridHeight, self.gridWidthState, self.gridHeight-2)
@@ -79,7 +79,7 @@ class QTable:
                         avGrid = pygame.Rect(stateNameOffset+a * self.gridWidthActions + 2, 15 + s * self.gridHeight,
                                              self.gridWidthActions - 2, self.gridHeight - 2)
                         if a in indxs:
-                            if self.q[s][a] < 0:
+                            if b==0:
                                 pygame.draw.rect(self.surface, self.hsv2rgb(0,normalized[a],1), avGrid)
                             else:
                                 # 0.380,0.572,0.788
