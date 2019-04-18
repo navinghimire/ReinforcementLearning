@@ -2,7 +2,7 @@ import pygame
 from elements import Color, Action
 from state import State
 import colorsys
-import numpy as np
+
 
 def scale(X, x_min, x_max):
     nom = (X - X.min(axis=0)) * (x_max - x_min)
@@ -53,6 +53,7 @@ class PDWorld:
 
         q = self.qtable.q
 
+        normalized = scale(q[:,[0,1,2,3]],0,1)
 
 
         polygonOffset = 1
@@ -71,45 +72,43 @@ class PDWorld:
 
                     applicableActions = self.getApplicableActions(st)
                     apIndex = [x.value for x in applicableActions]
-                    k = 1
-                    s = st.indx()
-                    normalized = scale(q[:, [0, 1, 2, 3]], 0, 255)
 
+                    s = st.indx()
                     for a in apIndex:
                         # c = 0.38
-
+                        if self.state.b == 1:
+                            c = 0.38
+                        else:
+                            c = 0
                         if a == 4 or a == 5:
                             continue
-                        if self.state.b == 1:
-                            ca = 0
-                            cb = normalized[s,a]
-                        else:
-                            ca = normalized[s, a]
-                            cb = 0
-
-                        toColor = (ca, cb, 0)
                         if a == 2:
-
+                            toColor = self.qtable.hsv2rgb(c, normalized[s,2], 1)
                             northPolygon = pygame.draw.polygon(self.surface, toColor, (
                                 (centerx, centery - polygonOffset),
                                 (topRightx - 2 * polygonOffset, topRighty + polygonOffset),
                                 (topLeftx + 2 * polygonOffset, topLefty + polygonOffset)))
                         elif a == 3:
+                            toColor = self.qtable.hsv2rgb(c, normalized[s,3], 1)
                             southPolygon = pygame.draw.polygon(self.surface, toColor, (
                                 (centerx, centery + polygonOffset),
                                 (bottomLeftx + 2 * polygonOffset, bottomLefty - polygonOffset),
                                 (bottomRightx - 2 * polygonOffset, bottomLefty - polygonOffset)))
                         elif a == 1:
+                            toColor = self.qtable.hsv2rgb(c, normalized[s,1], 1)
                             westPolygon = pygame.draw.polygon(self.surface, toColor, (
                                 (centerx - polygonOffset, centery),
                                 (topLeftx + polygonOffset, topLefty + 2 * polygonOffset),
                                 (bottomLeftx + polygonOffset, bottomLefty - 2 * polygonOffset)))
                         elif a == 0:
+                            if a in apIndex:
+                                toColor = self.qtable.hsv2rgb(c, normalized[s,0], 1)
                             eastPolygon = pygame.draw.polygon(self.surface, toColor, (
                                 (centerx + polygonOffset, centery),
                                 (topRightx - polygonOffset, topLefty + 2 * polygonOffset),
                                 (bottomRightx - polygonOffset, bottomRighty - 2 * polygonOffset)))
-
+                        else:
+                            toColor = Color.D_GREY
                     stateIndex = st.indx()
                     cell = pygame.Rect(halborder + j * self.cellSize + offsetx, halborder + i * self.cellSize + offsety,
                                        self.cellSize, self.cellSize)
@@ -169,18 +168,3 @@ class PDWorld:
         self.pickupItemCount = [5,5,5]
         self.dropoffItemCount = [0,0,0]
         return
-    def interpolate(self,arr,minRange, maxRange,state=None):
-        aset = set(self.qtable.q.flatten())
-        if len(aset) > 2:
-            max = sorted(aset)[-2]
-            min = sorted(aset)[0]
-        elif len(aset) > 1:
-            max = sorted(aset)[-1]
-            min = sorted(aset)[0]
-        else:
-            max = sorted(aset)[0]
-            min = sorted(aset)[0]
-        if state == None:
-            return np.interp(arr, (min,max),(minRange, maxRange))
-        else:
-            return np.interp(arr, (min, max), (minRange,maxRange))
