@@ -61,17 +61,23 @@ def main():
     policy4 = Policy(PolicyType.RANDOM)
     policy5 = Policy(PolicyType.RANDOM)
 
-    qtable1 = QTable(NUM_STATES,NUM_ACTIONS, mainSurfaceSize, qtableLocation, Populate.ZEROS,world1)
+    qtable1 = QTable(NUM_STATES,NUM_ACTIONS, mainSurfaceSize, qtableLocation, Populate.ZEROS, world1)
     qtable2 = QTable(NUM_STATES, NUM_ACTIONS, mainSurfaceSize, qtableLocation, Populate.ZEROS, world2)
     qtable3 = QTable(NUM_STATES, NUM_ACTIONS, mainSurfaceSize, qtableLocation, Populate.ZEROS, world3)
     qtable4 = QTable(NUM_STATES, NUM_ACTIONS, mainSurfaceSize, qtableLocation, Populate.ZEROS, world4)
     qtable5 = QTable(NUM_STATES, NUM_ACTIONS, mainSurfaceSize, qtableLocation, Populate.ZEROS, world5)
-
+    #
     r1 = RLearning(1, world1, qtable1, policy1, RL.Q_LEARNING, 0.3, 0.5, 0.2, 0, 8000,0)
     r2 = RLearning(2, world2, qtable2, policy2, RL.Q_LEARNING, 0.3, 0.5, 0.2, 0, 8000,0)
     r3 = RLearning(3, world3, qtable3, policy3, RL.SARSA, 0.3, 0.5, 0.2, 0, 8000, 0)
     r4 = RLearning(4, world4, qtable4, policy4, RL.SARSA, 0.3, 1, 0.2, 0, 8000, 0)
     r5 = RLearning(5, world5, qtable5, policy5, RL. Q_LEARNING, 0.3, 0.5, 0.2, 0, 8000, 0)
+
+    # r1 = RLearning(1, world1, qtable1, policy1, RL.Q_LEARNING, 0.01, 0.9, 0.2, 0, 8000,0)
+    # r2 = RLearning(2, world2, qtable2, policy2, RL.Q_LEARNING, 0.01, 0.9, 0.2, 0, 8000,0)
+    # r3 = RLearning(3, world3, qtable3, policy3, RL.SARSA, 0.01, 0.9, 0.2, 0, 8000, 0)
+    # r4 = RLearning(4, world4, qtable4, policy4, RL.SARSA, 0.01, 1, 0.2, 0, 8000, 0)
+    # r5 = RLearning(5, world5, qtable5, policy5, RL. Q_LEARNING, 0.3, 0.5, 0.2, 0, 8000, 0)
 
     qtables = [qtable1,qtable2,qtable3,qtable4,qtable5]
 
@@ -86,15 +92,15 @@ def main():
             e.world.selected = True
         else:
             e.world.selected = False
-
+    i = 0
     for r in rl:
+        r.world.qtable = qtables[i]
+        i += 1
         r.nextEpisode()
     pygame.time.wait(1500)
 
+    render = False
     while True:
-
-
-
         for r in rl:
             event = pygame.event.poll()
             if event.type == pygame.QUIT:
@@ -162,7 +168,11 @@ def main():
         qtables[displayQtable].update()
         qtables[displayQtable].draw(mainSurface)
 
+        # if step % 100:
+        #     print("Step: ",step)
+        # if render == True:
         pygame.display.update()
+
         step += 1
         clock.tick(0)
 

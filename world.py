@@ -1,8 +1,17 @@
 import pygame
 from elements import Color, Action
 from state import State
+import colorsys
+
+
+def scale(X, x_min, x_max):
+    nom = (X - X.min(axis=0)) * (x_max - x_min)
+    denom = X.max(axis=0) - X.min(axis=0)
+    denom[denom == 0] = 1
+    return x_min + nom / denom
+
 class PDWorld:
-    def __init__(self, startLocation, cellSize, surfaceSize, numGrid, state, agentSize, pickupPoints, dropOffPoints, pickupItemCount, dropOffItemCount):
+    def __init__(self, startLocation, cellSize, surfaceSize, numGrid, state, agentSize, pickupPoints, dropOffPoints, pickupItemCount, dropOffItemCount, qtable = None):
         self.surface = pygame.Surface(surfaceSize)
         self.surface.fill(Color.VL_GREY)
         self.startLocation = startLocation
@@ -19,6 +28,8 @@ class PDWorld:
         self.selected = False
         self.toggleView = True
         self.stateView = 0
+        self.qtable = qtable
+
     def update(self):
         # draw grid
         offsetx = 10
@@ -40,12 +51,17 @@ class PDWorld:
                     pygame.draw.rect(self.surface, Color.L_GREY, cell)
 
 
+        q = self.qtable.q
+
+        normalized = scale(q[:,[0,1,2,3]],0,1)
+
+
         polygonOffset = 1
         if self.toggleView:
             for i in range(5):
                 for j in range(5):
-                    b = self.stateView
-                    st = State(i,j,b)
+                    # b = self.stateView
+                    st = State(i,j,self.state.b)
 
                     centerx, centery = (halborder + offsetx + j * self.cellSize + self.cellSize//2, halborder + offsety + i * self.cellSize + self.cellSize//2)
                     topLeftx, topLefty = (halborder + offsetx + j * self.cellSize , halborder + offsety + i * self.cellSize)
@@ -54,21 +70,46 @@ class PDWorld:
                     bottomLeftx, bottomLefty = (halborder + offsetx + j * self.cellSize,
                                    halborder + offsety + i * self.cellSize + self.cellSize)
 
-                    # pygame.draw.circle(self.surface,Color.BLACK,center,2)
-                    # pygame.draw.circle(self.surface,Color.BLACK,bottomLeft,2)
-                    # pygame.draw.circle(self.surface,Color.BLACK,bottomRight,2)
-                    # pygame.draw.circle(self.surface,Color.BLACK,topLeft,2)
-                    # pygame.draw.circle(self.surface, Color.BLACK, topRight, 2)
+                    applicableActions = self.getApplicableActions(st)
+                    apIndex = [x.value for x in applicableActions]
 
-
-                    northPolygon = pygame.draw.polygon(self.surface,Color.GREEN,((centerx,centery-polygonOffset),(topRightx-2*polygonOffset,topRighty+polygonOffset),(topLeftx+2*polygonOffset,topLefty+polygonOffset)))
-                    southPolygon = pygame.draw.polygon(self.surface,Color.GREEN,((centerx,centery+polygonOffset),(bottomLeftx+2*polygonOffset,bottomLefty-polygonOffset),(bottomRightx-2*polygonOffset,bottomLefty-polygonOffset)))
-                    eastPolygon = pygame.draw.polygon(self.surface,Color.GREEN,((centerx-polygonOffset,centery),(topLeftx+polygonOffset,topLefty+2*polygonOffset),(bottomLeftx+polygonOffset, bottomLefty-2*polygonOffset)))
-                    westPolygon = pygame.draw.polygon(self.surface,Color.GREEN,((centerx+polygonOffset, centery),(topRightx-polygonOffset,topLefty+2*polygonOffset),(bottomRightx-polygonOffset,bottomRighty-2*polygonOffset)))
-
-
+                    s = st.indx()
+                    for a in apIndex:
+                        # c = 0.38
+                        if self.state.b == 1:
+                            c = 0.38
+                        else:
+                            c = 0
+                        if a == 4 or a == 5:
+                            continue
+                        if a == 2:
+                            toColor = self.qtable.hsv2rgb(c, normalized[s,2], 1)
+                            northPolygon = pygame.draw.polygon(self.surface, toColor, (
+                                (centerx, centery - polygonOffset),
+                                (topRightx - 2 * polygonOffset, topRighty + polygonOffset),
+                                (topLeftx + 2 * polygonOffset, topLefty + polygonOffset)))
+                        elif a == 3:
+                            toColor = self.qtable.hsv2rgb(c, normalized[s,3], 1)
+                            southPolygon = pygame.draw.polygon(self.surface, toColor, (
+                                (centerx, centery + polygonOffset),
+                                (bottomLeftx + 2 * polygonOffset, bottomLefty - polygonOffset),
+                                (bottomRightx - 2 * polygonOffset, bottomLefty - polygonOffset)))
+                        elif a == 1:
+                            toColor = self.qtable.hsv2rgb(c, normalized[s,1], 1)
+                            westPolygon = pygame.draw.polygon(self.surface, toColor, (
+                                (centerx - polygonOffset, centery),
+                                (topLeftx + polygonOffset, topLefty + 2 * polygonOffset),
+                                (bottomLeftx + polygonOffset, bottomLefty - 2 * polygonOffset)))
+                        elif a == 0:
+                            if a in apIndex:
+                                toColor = self.qtable.hsv2rgb(c, normalized[s,0], 1)
+                            eastPolygon = pygame.draw.polygon(self.surface, toColor, (
+                                (centerx + polygonOffset, centery),
+                                (topRightx - polygonOffset, topLefty + 2 * polygonOffset),
+                                (bottomRightx - polygonOffset, bottomRighty - 2 * polygonOffset)))
+                        else:
+                            toColor = Color.D_GREY
                     stateIndex = st.indx()
-                    # polygon = pygame.Rect()
                     cell = pygame.Rect(halborder + j * self.cellSize + offsetx, halborder + i * self.cellSize + offsety,
                                        self.cellSize, self.cellSize)
 
@@ -100,11 +141,8 @@ class PDWorld:
                     x * self.cellSize + packageOffset * i + int(self.agentSize / 2) + offsetx, y * self.cellSize + border + offsety +packageOffsetFromOriginY),
                                    int(self.agentSize / 2))
 
-
-
     def draw(self, targetSurface):
         targetSurface.blit(self.surface,self.startLocation)
-
     def getApplicableActions(self,state):
         y,x,b = state.get()
         # print(self.pickupPoints, (y,x))
