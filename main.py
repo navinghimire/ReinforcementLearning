@@ -125,13 +125,13 @@ def main():
             else:
                 r.world.selected = False
 
-            # if step == 4000 or step == 200 or step == r.steps:
-            #     for i in range(5):
-            #         qtables[i].update()
-            #         qtables[i].draw(mainSurface)
-            #         pygame.display.update()
-            #         filename = 'Experiment_' + str(i+1) + '_' +str(step) +'.png'
-            #         pygame.image.save(mainSurface,filename)
+            if step == 4000 or step == 200 or step == r.steps:
+                for i in range(5):
+                    qtables[i].update()
+                    qtables[i].draw(mainSurface)
+                    pygame.display.update()
+                    filename = 'Experiment_' + str(i+1) + '_' +str(step) +'.png'
+                    pygame.image.save(mainSurface,filename)
 
             if r.expNum == 1 and step == 4000:
                 r.policy.switchPolicy(PolicyType.GREEDY)

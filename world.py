@@ -73,37 +73,38 @@ class PDWorld:
                     apIndex = [x.value for x in applicableActions]
                     k = 1
                     s = st.indx()
-                    normalized = scale(q[:, [0, 1, 2, 3,4,5]], 0, 1)
+                    normalized = scale(q[:, [0, 1, 2, 3]], 0, 255)
 
                     for a in apIndex:
                         # c = 0.38
-                        if self.state.b == 1:
-                            c = 0.38
-                        else:
-                            c = 0
+
                         if a == 4 or a == 5:
                             continue
+                        if self.state.b == 1:
+                            ca = 0
+                            cb = normalized[s,a]
+                        else:
+                            ca = normalized[s, a]
+                            cb = 0
+
+                        toColor = (ca, cb, 0)
                         if a == 2:
-                            toColor = self.qtable.hsv2rgb(c, k-normalized[s,2], 1)
+
                             northPolygon = pygame.draw.polygon(self.surface, toColor, (
                                 (centerx, centery - polygonOffset),
                                 (topRightx - 2 * polygonOffset, topRighty + polygonOffset),
                                 (topLeftx + 2 * polygonOffset, topLefty + polygonOffset)))
                         elif a == 3:
-                            toColor = self.qtable.hsv2rgb(c, k - normalized[s,3], 1)
                             southPolygon = pygame.draw.polygon(self.surface, toColor, (
                                 (centerx, centery + polygonOffset),
                                 (bottomLeftx + 2 * polygonOffset, bottomLefty - polygonOffset),
                                 (bottomRightx - 2 * polygonOffset, bottomLefty - polygonOffset)))
                         elif a == 1:
-                            toColor = self.qtable.hsv2rgb(c, k-normalized[s,1], 1)
                             westPolygon = pygame.draw.polygon(self.surface, toColor, (
                                 (centerx - polygonOffset, centery),
                                 (topLeftx + polygonOffset, topLefty + 2 * polygonOffset),
                                 (bottomLeftx + polygonOffset, bottomLefty - 2 * polygonOffset)))
                         elif a == 0:
-                            if a in apIndex:
-                                toColor = self.qtable.hsv2rgb(c, k-normalized[s,0], 1)
                             eastPolygon = pygame.draw.polygon(self.surface, toColor, (
                                 (centerx + polygonOffset, centery),
                                 (topRightx - polygonOffset, topLefty + 2 * polygonOffset),
