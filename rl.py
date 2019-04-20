@@ -8,7 +8,7 @@ class RLearning:
     def __init__(self,expNum, world, qtable, policy, RLtype, alpha, gamma, epsilon, episodes, steps, currentStep):
         self.expNum = expNum
         self.statLocation = (10+world.startLocation[0],world.startLocation[1] + world.numGrid[0] * world.cellSize + 20)
-        self.surface = pygame.Surface(world.surfaceSize)
+        self.surface = pygame.Surface((world.cellSize*world.numGrid[0],140))
         self.surface.fill(Color.VL_GREY)
         self.qtable = qtable
         self.world = world
@@ -27,9 +27,10 @@ class RLearning:
         self.font = pygame.font.SysFont("arial",16)
         self.s = self.world.state
         self.a = Action.EAST
+        self.world.a = self.a
         self.r = 0
         self.s_ = self.world.state
-        self.a_ = Action.EAST
+        self.a_ = np.random.choice(world.getApplicableActions(world.state))
     def chooseAction(self, state):
         applicableActions = self.world.getApplicableActions(state)
         # print(state.get(),applicableActions)
@@ -42,14 +43,7 @@ class RLearning:
             elif Action.DROPOFF in applicableActions:
                 choosenAction = Action.DROPOFF
             else:
-                actionMaxQ = self.qtable.argmax(state,indd)
-                # print(applicableActions)
-                randChoice = np.random.choice(actionMaxQ)
-                for i in range(len(applicableActions)):
-                    if i == randChoice:
-                        choosenAction = applicableActions[i]
-            # else:
-            #     choosenAction = np.random.choice(applicableActions)
+                choosenAction = np.random.choice(applicableActions)
         elif self.policy.policyType == PolicyType.GREEDY:
             # pygame.display.update()
             # print(state.get(),applicableActions)
@@ -124,17 +118,28 @@ class RLearning:
         else:
             return False
     def nextStep(self):
-
+        # applicableActions = self.world.getApplicableActions(self.world.state)
+        # actionSelected = self.nextAction(self.world.state)
+        # print(self.expNum, applicableActions, actionSelected)
+        #
         if self.RLtype == RL.Q_LEARNING:
 
             self.a = self.chooseAction(self.s)
 
+            # exit(self.a.value)
             r,s_ = self.applyaction(self.s,self.a)
 
             currentq = self.qtable.q[self.s.indx(),self.a.value]
             nextq = self.qtable.maxQ(s_)
             self.qtable.q[self.s.indx(),self.a.value] = currentq + self.alpha*(r + self.gamma*(nextq)-currentq)
-
+            # if r > 1:
+            #     print(r,s_.get(),self.world.getApplicableActions(self.s))
+            #     pygame.display.update()
+            #
+            #     print(self.qtable.q[self.s.indx(),self.a.value])
+            #     time.sleep(10)
+            if self.expNum == 1:
+                print(self.expNum,self.s.get(),self.qtable.q[self.s_.get(),:],self.a,s_.get(), r, currentq, self.qtable.q[self.s.indx(),self.a.value])
             self.s = s_
         elif self.RLtype == RL.SARSA:
             r,s_ = self.applyaction(self.s,self.a)

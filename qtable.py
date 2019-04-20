@@ -18,7 +18,7 @@ class QTable:
             self.q = np.ones([num_states, num_actions])
         elif populate == Populate.ZEROS:
             self.q = np.zeros([num_states, num_actions])
-        self.gridWidthState = 40
+        self.gridWidthState = 50
         self.gridWidthActions = 60
         self.gridHeight = 16
 
@@ -55,6 +55,7 @@ class QTable:
         actionValues = [x.value for x in actionList]
         ary = max(self.q[state.indx(),actionValues])
         return ary
+
     def hsv2rgb(self,h,s,v):
         return tuple(round(i*255) for i in colorsys.hsv_to_rgb(h,s,v))
     def update(self):
@@ -67,21 +68,32 @@ class QTable:
                 for b in range(2):
                     st = State(i,j,b)
                     s = st.indx()
-                    normalized = self.interpolate(0, 1, s)
+                    normalized = self.interpolate(0.5, 1, s)
                     actns = self.world.getApplicableActions(st)
                     indxs = [x.value for x in actns]
                     stateGrid = pygame.Rect(0, 15 + s * self.gridHeight, self.gridWidthState, self.gridHeight-2)
-                    pygame.draw.rect(self.surface,Color.GREEN, stateGrid)
+                    if b == 0:
+                        pcolor = Color.RED
+                    else:
+                        pcolor = Color.GREEN
+                    pygame.draw.rect(self.surface,pcolor, stateGrid)
                     stateName = self.font.render('['+str(i+1)+' ' + str(j+1) + ' ' + str(b) + ']', True, Color.BLACK)
                     self.surface.blit(stateName,(0, 15 + s * self.gridHeight))
                     for a in range(self.numActions):
+
                         avGrid = pygame.Rect(stateNameOffset+a * self.gridWidthActions + 2, 15 + s * self.gridHeight,
                                              self.gridWidthActions - 2, self.gridHeight - 2)
-                        if a in indxs:
 
-                            pygame.draw.rect(self.surface, self.hsv2rgb(0.5, normalized[a], .70), avGrid)
+                        if a in indxs:
+                            print(self.world.a)
+
+                            if b==0:
+                                pygame.draw.rect(self.surface, self.hsv2rgb(0,normalized[a],1), avGrid)
+                            else:
+                                # 0.380,0.572,0.788
+                                pygame.draw.rect(self.surface, self.hsv2rgb(0.380,normalized[a]*0.572,0.788), avGrid)
                         else:
-                            pygame.draw.rect(self.surface, Color.D_GREY, avGrid)
+                            pygame.draw.rect(self.surface, Color.BLACK, avGrid)
 
                         qValues = self.font.render(str(round(self.q[s][a], 4)), True, Color.BLACK)
                         self.surface.blit(qValues, (stateNameOffset+a * self.gridWidthActions + 2, 15 + s * self.gridHeight - 2))
