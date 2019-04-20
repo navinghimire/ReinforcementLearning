@@ -7,17 +7,20 @@ from rl import RLearning
 from policy import Policy,PolicyType
 from  elements import Color, Populate, Action, RL
 import colorsys
-
+from  pygame.locals import *
 def main():
     # print(colorsys.rgb_to_hsv(86, 201, 123))
     # exit()
+
+
     pygame.init()
     clock = pygame.time.Clock()
     frameRate = 0
     cellSize = 50
-    agentSize = 4
+    agentSize = 6
     mainSurfaceSize = (1280,820)
     mainSurface = pygame.display.set_mode(mainSurfaceSize)
+    mainSurface.fill((199, 189, 189))
     pickupPoints =[(0,0),(2,2),(4,4)]
     dropoffPoints = [(1,4),(4,0),(4,2)]
     NUM_STATES = 50
@@ -74,11 +77,11 @@ def main():
     r4 = RLearning(4, world4, qtable4, policy4, RL.SARSA, 0.3, 1, 0.2, 0, 8000, 0)
     r5 = RLearning(5, world5, qtable5, policy5, RL. Q_LEARNING, 0.3, 0.5, 0.2, 0, 8000, 0)
 
-    # r1 = RLearning(1, world1, qtable1, policy1, RL.Q_LEARNING, 0.01, 0.9, 0.2, 0, 8000,0)
-    # r2 = RLearning(2, world2, qtable2, policy2, RL.Q_LEARNING, 0.01, 0.9, 0.2, 0, 8000,0)
-    # r3 = RLearning(3, world3, qtable3, policy3, RL.SARSA, 0.01, 0.9, 0.2, 0, 8000, 0)
-    # r4 = RLearning(4, world4, qtable4, policy4, RL.SARSA, 0.01, 1, 0.2, 0, 8000, 0)
-    # r5 = RLearning(5, world5, qtable5, policy5, RL. Q_LEARNING, 0.3, 0.5, 0.2, 0, 8000, 0)
+    # r1 = RLearning(1, world1, qtable1, policy1, RL.Q_LEARNING, 0.1, 0.95, 0.2, 0, 8000,0)
+    # r2 = RLearning(2, world2, qtable2, policy2, RL.Q_LEARNING, 0.1, 0.95, 0.2, 0, 8000,0)
+    # r3 = RLearning(3, world3, qtable3, policy3, RL.SARSA, 0.1, 0.95, 0.2, 0, 8000, 0)
+    # r4 = RLearning(4, world4, qtable4, policy4, RL.SARSA, 0.1, 1, 0.2, 0, 8000, 0)
+    # r5 = RLearning(5, world5, qtable5, policy5, RL. Q_LEARNING, 0.1, 0.95, 0.2, 0, 8000, 0)
 
     qtables = [qtable1,qtable2,qtable3,qtable4,qtable5]
 
@@ -102,6 +105,18 @@ def main():
 
     render = False
     while True:
+        # if step > 100:
+        #     while True:
+        #         event = pygame.event.poll()
+        #         if event.type == pygame.QUIT:
+        #             pygame.quit()
+        #             # sys.exit()
+        #         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+        #             break
+        #
+
+        # if step == 400:
+        #     frameRate = 0.5
         for r in rl:
             event = pygame.event.poll()
             if event.type == pygame.QUIT:
@@ -125,13 +140,33 @@ def main():
             else:
                 r.world.selected = False
 
-            if step == 4000 or step == 200 or step == r.steps:
+            if step == 3999 or step == 199 or step == r.steps:
+                original = []
                 for i in range(5):
-                    qtables[i].update()
-                    qtables[i].draw(mainSurface)
-                    pygame.display.update()
-                    filename = 'Experiment_' + str(i+1) + '_' +str(step) +'.png'
-                    pygame.image.save(mainSurface,filename)
+                    original.append(rl[i].world.state.b)
+                    for j in range(2):
+                        txt = ["_without_package.png","_with_package.png"]
+                        rl[i].world.state.b = j
+
+                        rl[i].update()
+                        # mainSurface.fill(Color.VL_GREY)
+                        # pygame.display.update()
+                        rl[i].draw(mainSurface)
+                        pygame.display.update()
+                        filename = 'Experiment_' + str(i+1) + '_' +str(step) + txt[j]
+                        # 422 + 274
+
+                        qtables[i].update()
+                        qtables[i].draw(mainSurface)
+                        qtableSurface = pygame.Surface((422,816))
+                        qtableSurface.blit(qtables[i].surface,(0,0))
+                        surface = pygame.Surface((274,410))
+                        surface.fill((199, 189, 189))
+                        surface.blit(rl[i].world.surface,(0,0))
+                        surface.blit(rl[i].surface,(12,274))
+                        pygame.image.save(qtableSurface,'Experiment_'+str(i)+'_qtable_'+txt[j]+'.png')
+                        pygame.image.save(surface,filename)
+                    rl[i].world.state.b = original[i]
 
             if r.expNum == 1 and step == 4000:
                 r.policy.switchPolicy(PolicyType.GREEDY)

@@ -12,7 +12,7 @@ def scale(X, x_min, x_max):
 
 class PDWorld:
     def __init__(self, startLocation, cellSize, surfaceSize, numGrid, state, agentSize, pickupPoints, dropOffPoints, pickupItemCount, dropOffItemCount, qtable = None):
-        self.surface = pygame.Surface(surfaceSize)
+        self.surface = pygame.Surface((cellSize*numGrid[0]+24,cellSize*numGrid[0]+24))
         self.surface.fill(Color.VL_GREY)
         self.startLocation = startLocation
         self.surfaceSize = surfaceSize
@@ -29,7 +29,7 @@ class PDWorld:
         self.toggleView = True
         self.stateView = 0
         self.qtable = qtable
-
+        self.a = None
     def update(self):
         # draw grid
         offsetx = 10
@@ -73,52 +73,47 @@ class PDWorld:
                     applicableActions = self.getApplicableActions(st)
                     apIndex = [x.value for x in applicableActions]
 
+
+
                     s = st.indx()
-                    for a in apIndex:
+                    for a in range(4):
                         # c = 0.38
+                        toColor = Color.D_GREY
                         if self.state.b == 1:
                             c = 0.38
                         else:
                             c = 0
-                        if a == 4 or a == 5:
-                            continue
+                        if a in apIndex:
+                            toColor = self.qtable.hsv2rgb(c, normalized[s, a], 1)
                         if a == 2:
-                            toColor = self.qtable.hsv2rgb(c, normalized[s,2], 1)
                             northPolygon = pygame.draw.polygon(self.surface, toColor, (
                                 (centerx, centery - polygonOffset),
                                 (topRightx - 2 * polygonOffset, topRighty + polygonOffset),
                                 (topLeftx + 2 * polygonOffset, topLefty + polygonOffset)))
                         elif a == 3:
-                            toColor = self.qtable.hsv2rgb(c, normalized[s,3], 1)
                             southPolygon = pygame.draw.polygon(self.surface, toColor, (
                                 (centerx, centery + polygonOffset),
                                 (bottomLeftx + 2 * polygonOffset, bottomLefty - polygonOffset),
                                 (bottomRightx - 2 * polygonOffset, bottomLefty - polygonOffset)))
                         elif a == 1:
-                            toColor = self.qtable.hsv2rgb(c, normalized[s,1], 1)
                             westPolygon = pygame.draw.polygon(self.surface, toColor, (
                                 (centerx - polygonOffset, centery),
                                 (topLeftx + polygonOffset, topLefty + 2 * polygonOffset),
                                 (bottomLeftx + polygonOffset, bottomLefty - 2 * polygonOffset)))
                         elif a == 0:
-                            if a in apIndex:
-                                toColor = self.qtable.hsv2rgb(c, normalized[s,0], 1)
                             eastPolygon = pygame.draw.polygon(self.surface, toColor, (
                                 (centerx + polygonOffset, centery),
                                 (topRightx - polygonOffset, topLefty + 2 * polygonOffset),
                                 (bottomRightx - polygonOffset, bottomRighty - 2 * polygonOffset)))
-                        else:
-                            toColor = Color.D_GREY
+
                     stateIndex = st.indx()
                     cell = pygame.Rect(halborder + j * self.cellSize + offsetx, halborder + i * self.cellSize + offsety,
                                        self.cellSize, self.cellSize)
-
-
-
         # drawing agent
         y,x,b = self.state.get()
 
         pygame.draw.circle(self.surface, Color.GREY,(halborder + offsetx + x * self.cellSize + self.cellSize//2, halborder + offsety + y * self.cellSize + self.cellSize//2),self.agentSize)
+
         if b == 1:
             pygame.draw.circle(self.surface,Color.WHITE, (halborder + offsetx + x * self.cellSize + self.cellSize//2, halborder + offsety + y * self.cellSize + self.cellSize//2), int(self.agentSize/2))
         # drawing pickupitems
