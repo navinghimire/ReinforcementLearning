@@ -112,10 +112,13 @@ class PDWorld:
         # drawing agent
         y,x,b = self.state.get()
 
+
         pygame.draw.circle(self.surface, Color.GREY,(halborder + offsetx + x * self.cellSize + self.cellSize//2, halborder + offsety + y * self.cellSize + self.cellSize//2),self.agentSize)
 
         if b == 1:
             pygame.draw.circle(self.surface,Color.WHITE, (halborder + offsetx + x * self.cellSize + self.cellSize//2, halborder + offsety + y * self.cellSize + self.cellSize//2), int(self.agentSize/2))
+
+
         # drawing pickupitems
         packageOffset = 8
         packageOffsetFromOriginX = 8

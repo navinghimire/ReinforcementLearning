@@ -5,8 +5,9 @@ import numpy as np
 import pygame
 import time
 class RLearning:
-    def __init__(self,expNum, world, qtable, policy, RLtype, alpha, gamma, epsilon, episodes, steps, currentStep):
+    def __init__(self,expNum, world, qtable, policy, RLtype, alpha, gamma, epsilon, episodes, steps, currentStep,f):
         self.expNum = expNum
+        self.f = f
         self.statLocation = (10+world.startLocation[0],world.startLocation[1] + world.numGrid[0] * world.cellSize + 20)
         self.surface = pygame.Surface((world.cellSize*world.numGrid[0],140))
         self.surface.fill(Color.VL_GREY)
@@ -123,13 +124,18 @@ class RLearning:
         # print(self.expNum, applicableActions, actionSelected)
         #
         if self.RLtype == RL.Q_LEARNING:
+            # if self.expNum == 1:
+            #     print('\n----',self.a, self.world.state.get())
 
             self.a = self.chooseAction(self.s)
-
+            # if self.expNum == 1:
+            #     print(self.a, self.world.state.get())
+            #     print(self.a.value)
             # exit(self.a.value)
             r,s_ = self.applyaction(self.s,self.a)
 
             currentq = self.qtable.q[self.s.indx(),self.a.value]
+
             nextq = self.qtable.maxQ(s_)
             self.qtable.q[self.s.indx(),self.a.value] = currentq + self.alpha*(r + self.gamma*(nextq)-currentq)
             # if r > 1:
@@ -138,8 +144,8 @@ class RLearning:
             #
             #     print(self.qtable.q[self.s.indx(),self.a.value])
             #     time.sleep(10)
-            if self.expNum == 1:
-                print(self.expNum,self.s.get(),self.qtable.q[self.s_.get(),:],self.a,s_.get(), r, currentq, self.qtable.q[self.s.indx(),self.a.value])
+            # if self.expNum == 1:
+            #     print(self.expNum,self.s.get(),self.qtable.q[self.s_.get(),:],self.a,s_.get(), r, currentq, self.qtable.q[self.s.indx(),self.a.value])
             self.s = s_
         elif self.RLtype == RL.SARSA:
             r,s_ = self.applyaction(self.s,self.a)
@@ -219,3 +225,9 @@ class RLearning:
             self.a = self.chooseAction(self.s)
         self.episodes += 1
 
+    def saveRunStatistics(self):
+        writeline = ''
+        for i in range(len(self.minStep)):
+            writeline += str(self.minStep[i]) + ' '
+        writeline += '\n'
+        self.f.write(writeline)
