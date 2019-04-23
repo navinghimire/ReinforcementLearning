@@ -29,6 +29,11 @@ class PDWorld:
         self.toggleView = True
         self.stateView = 0
         self.qtable = qtable
+        self.agentCurrentX = 0
+        self.agentCurrentY = 0
+        self.agentNextX = 0
+        self.agentNextY = 0
+
         self.a = None
     def update(self):
         # draw grid
@@ -112,11 +117,15 @@ class PDWorld:
         # drawing agent
         y,x,b = self.state.get()
 
+        self.agentCurrentX = self.stateToCoordinate(self.state,halborder,offsetx)[0]
+        self.agentCurrentY = self.stateToCoordinate(self.state,halborder,offsety)[1]
 
-        pygame.draw.circle(self.surface, Color.GREY,(halborder + offsetx + x * self.cellSize + self.cellSize//2, halborder + offsety + y * self.cellSize + self.cellSize//2),self.agentSize)
+
+
+        pygame.draw.circle(self.surface, Color.GREY,(self.agentCurrentX, self.agentCurrentY),self.agentSize)
 
         if b == 1:
-            pygame.draw.circle(self.surface,Color.WHITE, (halborder + offsetx + x * self.cellSize + self.cellSize//2, halborder + offsety + y * self.cellSize + self.cellSize//2), int(self.agentSize/2))
+            pygame.draw.circle(self.surface,Color.WHITE, (self.agentCurrentX, self.agentCurrentY), int(self.agentSize/2))
 
 
         # drawing pickupitems
@@ -166,3 +175,6 @@ class PDWorld:
         self.pickupItemCount = [5,5,5]
         self.dropoffItemCount = [0,0,0]
         return
+    def stateToCoordinate(self,state,offset,border):
+        y,x,b = state.get()
+        return [border + offset + x * self.cellSize + self.cellSize//2,border + offset + y * self.cellSize + self.cellSize//2]

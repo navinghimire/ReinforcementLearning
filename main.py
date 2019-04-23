@@ -22,7 +22,7 @@ def main():
     clock = pygame.time.Clock()
     for run in range(2):
         np.random.seed(seedC)
-        frameRate = 1
+        frameRate = 10
         cellSize = 50
         agentSize = 6
         mainSurfaceSize = (1280,820)
@@ -37,34 +37,34 @@ def main():
 
         pickupItemCount1 = [5,5,5]
         dropoffItemCount1 = [0,0,0]
-        startingState1 = State(0,4,0)
+        startingState = State(0,4,0)
         startLocation1 = (0,0)
 
-        world1 = PDWorld(startLocation1,cellSize,mainSurfaceSize, numGrid, startingState1,agentSize,pickupPoints,dropoffPoints,pickupItemCount1,dropoffItemCount1)
+        world1 = PDWorld(startLocation1,cellSize,mainSurfaceSize, numGrid, startingState,agentSize,pickupPoints,dropoffPoints,pickupItemCount1,dropoffItemCount1)
 
         pickupItemCount2 = [5,5,5]
         dropoffItemCount2 = [0,0,0]
         startingState2 = State(0, 4, 0)
         startLocation2 = (270,0)
-        world2 = PDWorld(startLocation2, cellSize ,mainSurfaceSize, numGrid, startingState2,agentSize,pickupPoints,dropoffPoints,pickupItemCount2,dropoffItemCount2)
+        world2 = PDWorld(startLocation2, cellSize ,mainSurfaceSize, numGrid, startingState,agentSize,pickupPoints,dropoffPoints,pickupItemCount2,dropoffItemCount2)
 
         pickupItemCount3 = [5,5,5]
         dropoffItemCount3 = [0,0,0]
         startingState3 = State(0, 4, 0)
         startLocation3 = (540,0)
-        world3 = PDWorld(startLocation3, cellSize ,mainSurfaceSize, numGrid, startingState3,agentSize,pickupPoints,dropoffPoints,pickupItemCount3,dropoffItemCount3)
+        world3 = PDWorld(startLocation3, cellSize ,mainSurfaceSize, numGrid, startingState,agentSize,pickupPoints,dropoffPoints,pickupItemCount3,dropoffItemCount3)
 
         pickupItemCount4 = [5,5,5]
         dropoffItemCount4 = [0,0,0]
         startingState4 = State(0, 4, 0)
         startLocation4 = (0,405)
-        world4 = PDWorld(startLocation4, cellSize ,mainSurfaceSize, numGrid, startingState4,agentSize,pickupPoints,dropoffPoints,pickupItemCount4,dropoffItemCount4)
+        world4 = PDWorld(startLocation4, cellSize ,mainSurfaceSize, numGrid, startingState,agentSize,pickupPoints,dropoffPoints,pickupItemCount4,dropoffItemCount4)
 
         pickupItemCount5 = [5,5,5]
         dropoffItemCount5 = [0,0,0]
         startingState5 = State(0, 4, 0)
         startLocation5 = (270,405)
-        world5 = PDWorld(startLocation5, cellSize ,mainSurfaceSize, numGrid, startingState5,agentSize,pickupPoints,dropoffPoints,pickupItemCount5,dropoffItemCount5)
+        world5 = PDWorld(startLocation5, cellSize ,mainSurfaceSize, numGrid, startingState,agentSize,pickupPoints,dropoffPoints,pickupItemCount5,dropoffItemCount5)
 
         policy1 = Policy(PolicyType.RANDOM)
         policy2 = Policy(PolicyType.RANDOM)
@@ -84,42 +84,58 @@ def main():
         r4 = RLearning(4, world4, qtable4, policy4, RL.SARSA, 0.3, 1, 0.2, 0, 8000, 0,f)
         r5 = RLearning(5, world5, qtable5, policy5, RL. Q_LEARNING, 0.3, 0.5, 0.2, 0, 8000, 0,f)
 
+
+
         qtables = [qtable1,qtable2,qtable3,qtable4,qtable5]
         rl = [r1,r2,r3,r4,r5]
-        displayQtable = 0
-        for e in rl:
-            if e.expNum-1== displayQtable:
-                e.world.selected = True
-            else:
-                e.world.selected = False
+        currentStates = []
+        nextStates = []
+        for i in range(len(rl)):
+            currentStates.append(startingState)
+            nextStates.append(startingState)
         i = 0
         for r in rl:
             r.world.qtable = qtables[i]
             i += 1
             r.nextEpisode()
         # pygame.time.wait(1500)
+        selected = 0
         for step in range(8000):
             # if step == 400:
             #     frameRate = 0.5
+            clickBoxes = []
+            for r in range(len(rl)):
+                minX = rl[r].world.startLocation[0]
+                minY = rl[r].world.startLocation[1]
+                maxX = rl[r].world.startLocation[0] + cellSize * numGrid[0] + 10 + 6
+                maxY = rl[r].world.startLocation[1] + cellSize * numGrid[1] + 10 + 6
+                clickBoxes.append([minX,maxX,minY,maxY])
+
+            event = pygame.event.poll()
+            if event.type == pygame.QUIT:
+                exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                mousex, mousey = pygame.mouse.get_pos()
+                for i in range(len(rl)):
+                    if mousex > clickBoxes[i][0] and mousex < clickBoxes[i][1] and mousey > clickBoxes[i][2] and mousey < clickBoxes[i][3]:
+                        selected = i
+                    # if r.expNum-1 == selected:
+                    #     r.world.selected = True
+                    #     print(clickBoxes[selected], mousex, mousey)
+                    #
+                    # else:
+                    #     r.world.selected = False
+
+
+
             for r in rl:
+                currentStates[r.expNum-1] = r.s
                 event = pygame.event.poll()
                 if event.type == pygame.QUIT:
                     exit()
-                if event.type == pygame.MOUSEBUTTONDOWN:
-                    if event.button == 1:
-                        displayQtable += 1
-                    if event.button == 3:
-                        displayQtable -= 1
-
-
-                if displayQtable > 4:
-                    displayQtable = 0
-                if displayQtable < 0:
-                    displayQtable = 4
-
 
                 expN = r.expNum
-                if expN-1 == displayQtable:
+                if expN-1 == selected:
                     r.world.selected = True
                 else:
                     r.world.selected = False
@@ -185,12 +201,13 @@ def main():
                 if step < r.steps:
                     r.nextStep()
 
-            qtables[displayQtable].update()
-            qtables[displayQtable].draw(mainSurface)
+            qtables[selected].update()
+            qtables[selected].draw(mainSurface)
 
 
 
-
+            for r in rl:
+                nextStates[r.expNum-1] = r.s
 
 
             # if step % 100:
@@ -206,6 +223,11 @@ def main():
             #             # sys.exit()
             #         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
             #             break
+            # for i in range(len(rl)):
+            #     print(r.world.stateToCoordinate(currentStates[i],6,10))
+            #     # if i == 1:
+            #     #     print(currentStates[i].get(), nextStates[i].get())
+
 
 
             clock.tick(frameRate)
