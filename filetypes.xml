@@ -1,0 +1,14 @@
+<application>
+  <component name="FileTypeManager" version="17">
+    <ignoreFiles list="*$py.class;*.hprof;*.pyc;*.pyo;*.rbc;*.yarb;*~;.DS_Store;.git;.hg;.svn;CVS;__pycache__;_svn;vssver.scc;vssver2.scc;" />
+    <extensionMap>
+      <mapping pattern="CityShortestPath" type="PLAIN_TEXT" />
+      <mapping pattern="m" type="PLAIN_TEXT" />
+      <mapping pattern="dddd" type="PLAIN_TEXT" />
+      <mapping pattern="state" type="Python" />
+      <mapping pattern="f" type="Python" />
+      <mapping pattern="qtable" type="Python" />
+      <mapping pattern="world" type="Python" />
+    </extensionMap>
+  </component>
+</application>
