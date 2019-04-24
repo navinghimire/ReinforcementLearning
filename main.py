@@ -295,10 +295,12 @@ def main():
                 mpl.rcParams["legend.fancybox"] = False
                 for r in rl:
                     s = r.rewardPerTimeStep
-                    lt = 0.8
+                    lt = 1
+                    ls = ':'
                     if r.expNum-1 == selected:
                         lt = 2.0
-                    ax.plot(t, s, label = 'Exp '+str(r.expNum),linewidth = lt)
+                        ls = '-'
+                    ax.plot(t, s, label = 'Exp '+str(r.expNum),linewidth = lt, linestyle = ls)
                     ax.grid()
                     ax.legend()
                 canvas.draw()
@@ -316,21 +318,21 @@ def main():
                 rect = image.get_rect()
                 plot1Surface.blit(image,rect)
 
+            # plot2Surface.fill((199, 160, 189))
 
-            # # plot2Surface.fill((199, 160, 189))
-            # fig1, ax1 = plt.subplots(figsize=(4.8, 4.4))
-            # ax1.set(xlabel='s/e', ylabel='steps', title='steps per terminal episode')
-            # for r in rl:
-            #     if r.isTerminalState():
-            #         plot2Surface.fill((199, 189, 189))
-            #         for rk in rl:
-            #             t = range(max(len(rk.minStep),0))
-            #             s = rk.minStep
-            #             ax1.plot(t,s, marker='o')
-            #         fig1.savefig('sevs.png', transparent = True)
-            #         image1 = pygame.image.load('sevs.png')
-            #         rect1 = image1.get_rect()
-            #         plot2Surface.blit(image1,rect1)
+            for r in rl:
+                if r.isTerminalState():
+                    fig1, ax1 = plt.subplots(figsize=(4.8, 4.4))
+                    ax1.set(xlabel='s/e', ylabel='steps', title='steps per terminal episode')
+                    plot2Surface.fill((199, 189, 189))
+                    for rk in rl:
+                        t = range(rk.episodes-1)
+                        s = rk.minStep
+                        ax1.plot(t,s, marker='o')
+                    fig1.savefig('sevs.png', transparent = True)
+                    image1 = pygame.image.load('sevs.png')
+                    rect1 = image1.get_rect()
+                    plot2Surface.blit(image1,rect1)
 
             mainSurface.blit(plot1Surface,(10,370))
             mainSurface.blit(plot2Surface,(610,370))
