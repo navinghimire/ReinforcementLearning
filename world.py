@@ -35,6 +35,7 @@ class PDWorld:
         self.agentNextY = 0
         self.colorMode = False
         self.a = None
+        self.currentA = Action.EAST
     def update(self):
         # draw grid
         offsetx = 10
@@ -132,7 +133,7 @@ class PDWorld:
 
 
         # drawing pickupitems
-        packageOffset = 8
+        packageOffset = 5
         packageOffsetFromOriginX = 8
         packageOffsetFromOriginY = 2
         for p in self.pickupPoints:

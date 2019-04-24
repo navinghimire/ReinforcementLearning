@@ -73,6 +73,7 @@ class QTable:
                     actns = self.world.getApplicableActions(st)
                     indxs = [x.value for x in actns]
                     stateGrid = pygame.Rect(0, (self.gridHeight-2) + s * self.gridHeight, self.gridWidthState, self.gridHeight-2)
+
                     if b == 0:
                         pcolor = Color.RED
                     else:
@@ -86,6 +87,7 @@ class QTable:
                         avGrid = pygame.Rect(stateNameOffset+a * self.gridWidthActions + 2, 15 + s * self.gridHeight,
                                              self.gridWidthActions - 2, self.gridHeight - 2)
                         if a in indxs:
+
                             if b==0:
                                 pygame.draw.rect(self.surface, self.hsv2rgb(0,normalized[a],1), avGrid)
                             else:
@@ -94,6 +96,8 @@ class QTable:
                         else:
                             pygame.draw.rect(self.surface, Color.GREY, avGrid)
 
+                        if self.world.state.indx() == s and a == self.world.currentA:
+                            pygame.draw.rect(self.surface, (255, 255, 255), avGrid)
 
                         qValues = self.font.render(str(round(self.q[s][a], 4)), True, Color.BLACK)
                         self.surface.blit(qValues, (stateNameOffset+a * self.gridWidthActions + 2, 15 + s * self.gridHeight - 2))

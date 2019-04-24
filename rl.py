@@ -25,6 +25,7 @@ class RLearning:
         self.stepDone = False
         self.selected = False
         self.minStep = []
+        self.color = Color.L_GREY
         self.font = pygame.font.SysFont("arial",14)
         self.s = self.world.state
         self.a = Action.EAST
@@ -128,6 +129,7 @@ class RLearning:
             self.r += r
             self.rewardPerTimeStep.append(self.r)
             currentq = self.qtable.q[self.s.indx(),self.a.value]
+            self.world.currentA = self.a.value
             nextq = self.qtable.maxQ(s_)
             self.qtable.q[self.s.indx(),self.a.value] = currentq + self.alpha*(r + self.gamma*(nextq)-currentq)
             self.s = s_
@@ -137,6 +139,7 @@ class RLearning:
             self.rewardPerTimeStep.append(self.r)
             a_ = self.chooseAction(s_)
             currentq = self.qtable.q[self.s.indx(),self.a.value]
+            self.world.currentA = self.a.value
             nextq = self.qtable.q[s_.indx(),a_.value]
             self.qtable.q[self.s.indx(),self.a.value] = currentq + self.alpha*(r + self.gamma*(nextq)-currentq)
             self.s = s_
@@ -165,15 +168,15 @@ class RLearning:
             minS = min(self.minStep)
 
 
-        if self.world.selected:
-            if self.episodes > 1:
-                pygame.draw.rect(self.surface,Color.GREEN,pygame.Rect(0,0,self.world.numGrid[0]*self.world.cellSize,18))
-            else:
-                pygame.draw.rect(self.surface, Color.RED,
-                                 pygame.Rect(0, 0, self.world.numGrid[0] * self.world.cellSize, 18))
-        else:
-            pygame.draw.rect(self.surface, (150,150,150),
-                             pygame.Rect(0, 0, self.world.numGrid[0] * self.world.cellSize, 18))
+        # if self.world.selected:
+            # if self.episodes > 1:
+        pygame.draw.rect(self.surface,self.color,pygame.Rect(0,0,self.world.numGrid[0]*self.world.cellSize,18))
+            # else:
+            # pygame.draw.rect(self.surface, Color.RED,
+            #                      pygame.Rect(0, 0, self.world.numGrid[0] * self.world.cellSize, 18))
+        # else:
+        #     pygame.draw.rect(self.surface, (150,150,150),
+        #                      pygame.Rect(0, 0, self.world.numGrid[0] * self.world.cellSize, 18))
         self.surface.blit(experiment,(0,0))
 
         pygame.draw.rect(self.surface,Color.L_GREY,pygame.Rect(0,20,self.world.numGrid[0]*self.world.cellSize,18))

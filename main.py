@@ -9,8 +9,8 @@ from elements import Color, Populate, Action, RL
 import colorsys
 from  pygame.locals import *
 # from kivy.uix.slider import Slider
-import  matplotlib
-matplotlib.use("Agg")
+import  matplotlib as mpl
+mpl.use("Agg")
 import  matplotlib.pyplot as plt
 import matplotlib.backends.backend_agg as agg
 
@@ -19,7 +19,12 @@ def main():
     # exit()
     f = open("results.txt", "a")
 
-
+    red = (217, 41, 56)
+    purple = ( 148, 105, 191)
+    blue = (36, 132, 191)
+    green = (50, 166, 46)
+    orange = (242, 98, 15)
+    expColors = [blue,orange,green,red,purple]
     render = False
     seedC = 42
     pygame.init()
@@ -35,7 +40,7 @@ def main():
 
         # plt.show()
         np.random.seed(seedC)
-        frameRate = 0
+        frameRate = 10
         cellSize = 40
         agentSize = 4
         mainSurfaceSize = (1380,820)
@@ -145,6 +150,7 @@ def main():
 
 
             for r in rl:
+                r.color = expColors[r.expNum-1]
                 # print(r.r)
                 currentStates[r.expNum-1] = r.s
                 event = pygame.event.poll()
@@ -246,18 +252,31 @@ def main():
                     startL2 = (rl[selected].world.startLocation[0] + cellSize * numGrid[0] + offsetx + 15,
                                rl[selected].world.startLocation[1] + cellSize * numGrid[1] + offsety + 135)
                     startL3 = (1095,364)
-
                     startLL = (1095,415)
-                    pygame.draw.circle(mainSurface,color,startL,4)
+
                     # pygame.draw.circle(mainSurface, color, startL1, 2)
                     # pygame.draw.circle(mainSurface, color, startL2, 2)
+
+                    # pygame.draw.circle(mainSurface, color, startLL, 2)
+                    pygame.draw.line(mainSurface, expColors[selected],startL,startL1,2)
+                    pygame.draw.line(mainSurface, expColors[selected], startL1, startL2, 2)
+                    pygame.draw.line(mainSurface, expColors[selected], startL2, startL3, 2)
+                    pygame.draw.line(mainSurface, expColors[selected], startL3, startLL, 2)
+                    pygame.draw.circle(mainSurface, (255, 255, 255), startL, 7)
+                    pygame.draw.circle(mainSurface, expColors[selected], startL, 5)
+                    pygame.draw.circle(mainSurface, (255,255,255), startL, 3)
+
                     pygame.draw.circle(mainSurface, color, startLL, 4)
 
-                    pygame.draw.circle(mainSurface, color, startLL, 2)
-                    pygame.draw.line(mainSurface,color,startL,startL1,2)
-                    pygame.draw.line(mainSurface, color, startL1, startL2, 2)
-                    pygame.draw.line(mainSurface, color, startL2, startL3, 2)
-                    pygame.draw.line(mainSurface, color, startL3, startLL, 2)
+                # lw = 38
+                # startColorCo = (rl[r].world.startLocation[0] + 10,
+                #                 rl[r].world.startLocation[1] + cellSize * numGrid[1] + lw)
+                # # pygame.draw.circle(mainSurface, purple, startColorCo, 2)
+                #
+                # startColorCoE = (rl[r].world.startLocation[0] + cellSize * numGrid[0] + 8,
+                #                  rl[r].world.startLocation[1] + cellSize * numGrid[1] + lw)
+                # pygame.draw.line(mainSurface,expColors[r],startColorCo,startColorCoE, 6)
+
             for r in rl:
                 nextStates[r.expNum-1] = r.s
 
@@ -265,37 +284,53 @@ def main():
             if step%1 == 0:
                 # plt.figure(figsize=(5,5))
                 plot1Surface.fill((199, 189, 189))
-                fig, ax = plt.subplots(figsize=(6.2, 4.4))
+                fig, ax = plt.subplots(figsize=(6.2, 4.4), facecolor ='#C7BDBD')
+                canvas = agg.FigureCanvasAgg(fig)
                 t = range(step+1)
+
                 ax.set(xlabel='step', ylabel='reward',
                        title='Step vs Reward')
+                ax.set_facecolor('#C7BDBD')
+                mpl.rcParams['legend.facecolor'] = '#C7BDBD'
+                mpl.rcParams["legend.fancybox"] = False
                 for r in rl:
                     s = r.rewardPerTimeStep
-                    ax.plot(t, s, label = 'Exp '+str(r.expNum), marker =',',linestyle=None)
+                    lt = 0.8
+                    if r.expNum-1 == selected:
+                        lt = 2.0
+                    ax.plot(t, s, label = 'Exp '+str(r.expNum),linewidth = lt)
                     ax.grid()
                     ax.legend()
-                fig.savefig("stepVreward.png", transparent=True)
-                image = pygame.image.load('stepVreward.png')
+                canvas.draw()
+                renderer = canvas.get_renderer()
+                raw_data = renderer.tostring_rgb()
+                size = canvas.get_width_height()
+                image = pygame.image.fromstring(raw_data,size,"RGB")
+
+
+
+                # fig.savefig("stepVreward.png", transparent=True)
+                # image = pygame.image.load('stepVreward.png')
                 # image = pygame.transform.scale(image,(400,400))
                 plt.close('all')
                 rect = image.get_rect()
                 plot1Surface.blit(image,rect)
 
 
-            # plot2Surface.fill((199, 160, 189))
-            fig1, ax1 = plt.subplots(figsize=(4.8, 4.4))
-            ax1.set(xlabel='s/e', ylabel='steps', title='steps per terminal episode')
-            for r in rl:
-                if r.isTerminalState():
-                    plot2Surface.fill((199, 189, 189))
-                    for rk in rl:
-                        t = range(max(len(rk.minStep),0))
-                        s = rk.minStep
-                        ax1.plot(t,s, marker='o')
-                    fig1.savefig('sevs.png', transparent = True)
-                    image1 = pygame.image.load('sevs.png')
-                    rect1 = image1.get_rect()
-                    plot2Surface.blit(image1,rect1)
+            # # plot2Surface.fill((199, 160, 189))
+            # fig1, ax1 = plt.subplots(figsize=(4.8, 4.4))
+            # ax1.set(xlabel='s/e', ylabel='steps', title='steps per terminal episode')
+            # for r in rl:
+            #     if r.isTerminalState():
+            #         plot2Surface.fill((199, 189, 189))
+            #         for rk in rl:
+            #             t = range(max(len(rk.minStep),0))
+            #             s = rk.minStep
+            #             ax1.plot(t,s, marker='o')
+            #         fig1.savefig('sevs.png', transparent = True)
+            #         image1 = pygame.image.load('sevs.png')
+            #         rect1 = image1.get_rect()
+            #         plot2Surface.blit(image1,rect1)
 
             mainSurface.blit(plot1Surface,(10,370))
             mainSurface.blit(plot2Surface,(610,370))
