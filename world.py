@@ -33,7 +33,7 @@ class PDWorld:
         self.agentCurrentY = 0
         self.agentNextX = 0
         self.agentNextY = 0
-
+        self.colorMode = False
         self.a = None
     def update(self):
         # draw grid
@@ -83,13 +83,16 @@ class PDWorld:
                     s = st.indx()
                     for a in range(4):
                         # c = 0.38
-                        toColor = Color.D_GREY
-                        if self.state.b == 1:
-                            c = 0.38
+                        if self.colorMode:
+                            toColor = Color.D_GREY
+                            if self.state.b == 1:
+                                c = 0.38
+                            else:
+                                c = 0
+                            if a in apIndex:
+                                toColor = self.qtable.hsv2rgb(c, normalized[s, a], 1)
                         else:
-                            c = 0
-                        if a in apIndex:
-                            toColor = self.qtable.hsv2rgb(c, normalized[s, a], 1)
+                            toColor = self.qtable.hsv2rgb(0,0,1 - normalized[s, a])
                         if a == 2:
                             northPolygon = pygame.draw.polygon(self.surface, toColor, (
                                 (centerx, centery - polygonOffset),

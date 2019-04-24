@@ -8,7 +8,7 @@ class RLearning:
     def __init__(self,expNum, world, qtable, policy, RLtype, alpha, gamma, epsilon, episodes, steps, currentStep,f):
         self.expNum = expNum
         self.f = f
-        self.statLocation = (10+world.startLocation[0],world.startLocation[1] + world.numGrid[0] * world.cellSize + 20)
+        self.startLocation = (10 + world.startLocation[0], world.startLocation[1] + world.numGrid[0] * world.cellSize + 20)
         self.surface = pygame.Surface((world.cellSize*world.numGrid[0],140))
         self.surface.fill(Color.VL_GREY)
         self.qtable = qtable
@@ -25,11 +25,12 @@ class RLearning:
         self.stepDone = False
         self.selected = False
         self.minStep = []
-        self.font = pygame.font.SysFont("arial",16)
+        self.font = pygame.font.SysFont("arial",14)
         self.s = self.world.state
         self.a = Action.EAST
         self.world.a = self.a
         self.r = 0
+        self.rewardPerTimeStep = []
         self.s_ = self.world.state
         self.a_ = np.random.choice(world.getApplicableActions(world.state))
     def chooseAction(self, state):
@@ -114,7 +115,9 @@ class RLearning:
             self.world.dropoffItemCount[indx] += 1
         return r, State(y,x,b)
     def isTerminalState(self):
+
         if self.world.pickupItemCount == [0,0,0] and self.world.dropoffItemCount == [5,5,5]:
+            self.r = 0
             return True
         else:
             return False
@@ -122,12 +125,16 @@ class RLearning:
         if self.RLtype == RL.Q_LEARNING:
             self.a = self.chooseAction(self.s)
             r,s_ = self.applyaction(self.s,self.a)
+            self.r += r
+            self.rewardPerTimeStep.append(self.r)
             currentq = self.qtable.q[self.s.indx(),self.a.value]
             nextq = self.qtable.maxQ(s_)
             self.qtable.q[self.s.indx(),self.a.value] = currentq + self.alpha*(r + self.gamma*(nextq)-currentq)
             self.s = s_
         elif self.RLtype == RL.SARSA:
             r,s_ = self.applyaction(self.s,self.a)
+            self.r += r
+            self.rewardPerTimeStep.append(self.r)
             a_ = self.chooseAction(s_)
             currentq = self.qtable.q[self.s.indx(),self.a.value]
             nextq = self.qtable.q[s_.indx(),a_.value]
@@ -158,10 +165,14 @@ class RLearning:
             minS = min(self.minStep)
 
 
-        if self.episodes > 1:
-            pygame.draw.rect(self.surface,Color.GREEN,pygame.Rect(0,0,self.world.numGrid[0]*self.world.cellSize,18))
+        if self.world.selected:
+            if self.episodes > 1:
+                pygame.draw.rect(self.surface,Color.GREEN,pygame.Rect(0,0,self.world.numGrid[0]*self.world.cellSize,18))
+            else:
+                pygame.draw.rect(self.surface, Color.RED,
+                                 pygame.Rect(0, 0, self.world.numGrid[0] * self.world.cellSize, 18))
         else:
-            pygame.draw.rect(self.surface, Color.RED,
+            pygame.draw.rect(self.surface, (150,150,150),
                              pygame.Rect(0, 0, self.world.numGrid[0] * self.world.cellSize, 18))
         self.surface.blit(experiment,(0,0))
 
@@ -194,7 +205,7 @@ class RLearning:
 
     def draw(self,mainSurface):
         self.world.draw(mainSurface)
-        mainSurface.blit(self.surface,self.statLocation)
+        mainSurface.blit(self.surface, self.startLocation)
         return
     def nextEpisode(self):
         self.s = self.world.startState

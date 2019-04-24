@@ -14,7 +14,7 @@ class Color:
     BLACK = (0,0,0)
     WHITE = (255,255,255)
 class ActionString:
-    actionString = ["EAST", "WEST", "NORTH", "SOUTH","PICKUP", "DROPOFF"]
+    actionString = ["EAST", "WEST", "NORTH", "SOUTH","PICK", "DROP"]
 class Action(Enum):
     EAST = 0
     WEST = 1

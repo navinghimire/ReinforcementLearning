@@ -5,10 +5,14 @@ from state import State
 import numpy as np
 from rl import RLearning
 from policy import Policy,PolicyType
-from  elements import Color, Populate, Action, RL
+from elements import Color, Populate, Action, RL
 import colorsys
 from  pygame.locals import *
-
+# from kivy.uix.slider import Slider
+import  matplotlib
+matplotlib.use("Agg")
+import  matplotlib.pyplot as plt
+import matplotlib.backends.backend_agg as agg
 
 def main():
     # print(colorsys.rgb_to_hsv(86, 201, 123))
@@ -21,18 +25,30 @@ def main():
     pygame.init()
     clock = pygame.time.Clock()
     for run in range(2):
+
+
+
+        plot1Surface = pygame.Surface((580,440))
+        plot1Surface.fill((199, 189, 189))
+        plot2Surface = pygame.Surface((480, 440))
+        plot2Surface.fill((199, 189, 189))
+
+        # plt.show()
         np.random.seed(seedC)
-        frameRate = 10
-        cellSize = 50
-        agentSize = 6
-        mainSurfaceSize = (1280,820)
-        mainSurface = pygame.display.set_mode(mainSurfaceSize)
+        frameRate = 0
+        cellSize = 40
+        agentSize = 4
+        mainSurfaceSize = (1380,820)
+        flags = DOUBLEBUF
+        mainSurface = pygame.display.set_mode(mainSurfaceSize,flags)
+        mainSurface.set_alpha(None)
+        pygame.display.set_caption("QLearning and SARSA")
         mainSurface.fill((199, 189, 189))
         pickupPoints =[(0,0),(2,2),(4,4)]
         dropoffPoints = [(1,4),(4,0),(4,2)]
         NUM_STATES = 50
         NUM_ACTIONS = 6
-        qtableLocation = (820,0)
+        qtableLocation = (1100,0)
         numGrid = (5,5)
 
         pickupItemCount1 = [5,5,5]
@@ -45,25 +61,25 @@ def main():
         pickupItemCount2 = [5,5,5]
         dropoffItemCount2 = [0,0,0]
         startingState2 = State(0, 4, 0)
-        startLocation2 = (270,0)
+        startLocation2 = (220,0)
         world2 = PDWorld(startLocation2, cellSize ,mainSurfaceSize, numGrid, startingState,agentSize,pickupPoints,dropoffPoints,pickupItemCount2,dropoffItemCount2)
 
         pickupItemCount3 = [5,5,5]
         dropoffItemCount3 = [0,0,0]
         startingState3 = State(0, 4, 0)
-        startLocation3 = (540,0)
+        startLocation3 = (440,0)
         world3 = PDWorld(startLocation3, cellSize ,mainSurfaceSize, numGrid, startingState,agentSize,pickupPoints,dropoffPoints,pickupItemCount3,dropoffItemCount3)
 
         pickupItemCount4 = [5,5,5]
         dropoffItemCount4 = [0,0,0]
         startingState4 = State(0, 4, 0)
-        startLocation4 = (0,405)
+        startLocation4 = (660,0)
         world4 = PDWorld(startLocation4, cellSize ,mainSurfaceSize, numGrid, startingState,agentSize,pickupPoints,dropoffPoints,pickupItemCount4,dropoffItemCount4)
 
         pickupItemCount5 = [5,5,5]
         dropoffItemCount5 = [0,0,0]
         startingState5 = State(0, 4, 0)
-        startLocation5 = (270,405)
+        startLocation5 = (880,0)
         world5 = PDWorld(startLocation5, cellSize ,mainSurfaceSize, numGrid, startingState,agentSize,pickupPoints,dropoffPoints,pickupItemCount5,dropoffItemCount5)
 
         policy1 = Policy(PolicyType.RANDOM)
@@ -101,6 +117,7 @@ def main():
         # pygame.time.wait(1500)
         selected = 0
         for step in range(8000):
+            mainSurface.fill((199, 189, 189))
             # if step == 400:
             #     frameRate = 0.5
             clickBoxes = []
@@ -127,18 +144,31 @@ def main():
                     #     r.world.selected = False
 
 
-
             for r in rl:
+                # print(r.r)
                 currentStates[r.expNum-1] = r.s
                 event = pygame.event.poll()
                 if event.type == pygame.QUIT:
                     exit()
+                if event.type == MOUSEBUTTONDOWN:
+                    #
+                    # pygame.display.update()
+                    # mainSurface.fill((199, 189, 189))
+                    if event.button == 3:
+                        for ri in range(len(rl)):
+                            if selected == ri:
+                                if rl[ri].qtable.selected == 1:
+                                    rl[ri].qtable.selected = 0
+                                else:
+                                    rl[ri].qtable.selected = 1
 
                 expN = r.expNum
                 if expN-1 == selected:
                     r.world.selected = True
+                    r.world.colorMode = True
                 else:
                     r.world.selected = False
+                    r.world.colorMode =False
 
                 # if step == 3999 or step == 199 or step == r.steps:
                 #     original = []
@@ -204,34 +234,77 @@ def main():
             qtables[selected].update()
             qtables[selected].draw(mainSurface)
 
+            for r in range(len(rl)):
+                if r == selected:
+                    color = (0,0,0)
+                    offsetx = 0
+                    offsety = 29
 
+                    startL = (rl[selected].world.startLocation[0] + cellSize*numGrid[0]+offsetx, rl[selected].world.startLocation[1] + cellSize * numGrid[1] + offsety)
+                    startL1 = (rl[selected].world.startLocation[0] + cellSize * numGrid[0] + offsetx + 15,
+                               rl[selected].world.startLocation[1] + cellSize * numGrid[1] + offsety)
+                    startL2 = (rl[selected].world.startLocation[0] + cellSize * numGrid[0] + offsetx + 15,
+                               rl[selected].world.startLocation[1] + cellSize * numGrid[1] + offsety + 135)
+                    startL3 = (1095,364)
 
+                    startLL = (1095,415)
+                    pygame.draw.circle(mainSurface,color,startL,4)
+                    # pygame.draw.circle(mainSurface, color, startL1, 2)
+                    # pygame.draw.circle(mainSurface, color, startL2, 2)
+                    pygame.draw.circle(mainSurface, color, startLL, 4)
+
+                    pygame.draw.circle(mainSurface, color, startLL, 2)
+                    pygame.draw.line(mainSurface,color,startL,startL1,2)
+                    pygame.draw.line(mainSurface, color, startL1, startL2, 2)
+                    pygame.draw.line(mainSurface, color, startL2, startL3, 2)
+                    pygame.draw.line(mainSurface, color, startL3, startLL, 2)
             for r in rl:
                 nextStates[r.expNum-1] = r.s
 
 
-            # if step % 100:
-            #     print("Step: ",step)
-            # if render == True:
+            if step%1 == 0:
+                # plt.figure(figsize=(5,5))
+                plot1Surface.fill((199, 189, 189))
+                fig, ax = plt.subplots(figsize=(6.2, 4.4))
+                t = range(step+1)
+                ax.set(xlabel='step', ylabel='reward',
+                       title='Step vs Reward')
+                for r in rl:
+                    s = r.rewardPerTimeStep
+                    ax.plot(t, s, label = 'Exp '+str(r.expNum), marker =',',linestyle=None)
+                    ax.grid()
+                    ax.legend()
+                fig.savefig("stepVreward.png", transparent=True)
+                image = pygame.image.load('stepVreward.png')
+                # image = pygame.transform.scale(image,(400,400))
+                plt.close('all')
+                rect = image.get_rect()
+                plot1Surface.blit(image,rect)
+
+
+            # plot2Surface.fill((199, 160, 189))
+            fig1, ax1 = plt.subplots(figsize=(4.8, 4.4))
+            ax1.set(xlabel='s/e', ylabel='steps', title='steps per terminal episode')
+            for r in rl:
+                if r.isTerminalState():
+                    plot2Surface.fill((199, 189, 189))
+                    for rk in rl:
+                        t = range(max(len(rk.minStep),0))
+                        s = rk.minStep
+                        ax1.plot(t,s, marker='o')
+                    fig1.savefig('sevs.png', transparent = True)
+                    image1 = pygame.image.load('sevs.png')
+                    rect1 = image1.get_rect()
+                    plot2Surface.blit(image1,rect1)
+
+            mainSurface.blit(plot1Surface,(10,370))
+            mainSurface.blit(plot2Surface,(610,370))
+            plt.close('all')
             pygame.display.update()
-
-            # if step > 100:
-            #     while True:
-            #         event = pygame.event.poll()
-            #         if event.type == pygame.QUIT:
-            #             pygame.quit()
-            #             # sys.exit()
-            #         if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-            #             break
-            # for i in range(len(rl)):
-            #     print(r.world.stateToCoordinate(currentStates[i],6,10))
-            #     # if i == 1:
-            #     #     print(currentStates[i].get(), nextStates[i].get())
-
-
-
             clock.tick(frameRate)
             seedC += 1
+
+
         for r in rl:
             l = str(run+1) + ' ' + str(r.expNum) + ' '
             f.write(l)
